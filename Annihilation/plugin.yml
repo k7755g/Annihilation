@@ -15,3 +15,5 @@ commands:
   vote:
     description: Places vote for a map
     aliases: v
+  stats:
+    description: Lists your stats

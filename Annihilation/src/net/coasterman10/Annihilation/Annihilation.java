@@ -28,7 +28,7 @@ public final class Annihilation extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		configManager = new ConfigManager(this);
-		configManager.loadConfigFiles("config.yml", "maps.yml", "shops.yml");
+		configManager.loadConfigFiles("config.yml", "maps.yml", "shops.yml", "stats.yml");
 
 		maps = new MapManager(this, configManager.getConfig("maps.yml"));
 		teams = new TeamManager(this);
