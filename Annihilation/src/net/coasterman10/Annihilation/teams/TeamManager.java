@@ -24,7 +24,7 @@ public class TeamManager {
 	}
 
 	public boolean inLobby(String player) {
-		return getTeamWithPlayer(player) != null;
+		return getTeamWithPlayer(player) == null;
 	}
 
 	public Team getTeamWithPlayer(String player) {

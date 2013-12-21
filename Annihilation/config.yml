@@ -1,6 +1,12 @@
+# When /annihilation start is run, the delay before starting phase 1 in seconds
 start-delay: 120
+
+# Phase length in seconds (Phase 5 is perpetual)
 phase-period: 600
-stats: flatfile
+
+# Stat system: "flatfile" for yml or "sql" for MySQL
+stats: sql
+
 MySQL:
     port: 3306
     user: mc_

@@ -17,3 +17,5 @@ commands:
     aliases: v
   stats:
     description: Lists your stats
+  class:
+    description: Selects your kit

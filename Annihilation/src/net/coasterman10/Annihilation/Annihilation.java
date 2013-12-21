@@ -3,6 +3,7 @@ package net.coasterman10.Annihilation;
 import java.util.logging.Level;
 
 import net.coasterman10.Annihilation.commands.AnnihilationCommand;
+import net.coasterman10.Annihilation.kits.KitManager;
 import net.coasterman10.Annihilation.listeners.ChatListener;
 import net.coasterman10.Annihilation.listeners.PlayerListener;
 import net.coasterman10.Annihilation.listeners.ResourceListener;
@@ -14,7 +15,6 @@ import net.coasterman10.Annihilation.stats.StatsManager;
 import net.coasterman10.Annihilation.teams.Team;
 import net.coasterman10.Annihilation.teams.TeamManager;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
@@ -29,6 +29,7 @@ public final class Annihilation extends JavaPlugin {
 	private ResourceListener resources;
 	private StatsManager stats;
 	private DatabaseHandler db;
+	private KitManager kits;
 	public Boolean useMysql = false;
 	
 	@Override
@@ -42,20 +43,25 @@ public final class Annihilation extends JavaPlugin {
 		Configuration shops = configManager.getConfig("shops.yml");
 		new Shop(this, "Weapon", shops);
 		new Shop(this, "Brewing", shops);
-
+		
+		stats = new StatsManager(this);
+		resources = new ResourceListener(this);
+		kits = new KitManager(this);
+		
+		Configuration config = configManager.getConfig("config.yml");
+		timer = new PhaseTimer(this, config);
+		voting = new VotingManager(this);
+		
 		new AnnihilationCommand(this);
 		new ChestLocker(this);
 		new ChatListener(this);
 		new PlayerListener(this);
 		new WorldListener(this);
-		stats = new StatsManager(this);
-		resources = new ResourceListener(this);
-		
-		Configuration config = configManager.getConfig("config.yml");
-		timer = new PhaseTimer(this, config);
-		voting = new VotingManager(this);
 
 		voting.setCurrentForPlayers(getServer().getOnlinePlayers());
+		
+		if (config.getString("stats").equalsIgnoreCase("sql"))
+			useMysql = true;
 		
 		if (useMysql) {
 			db = new DatabaseHandler(this.getConfig().getString("MySQL.host"),
@@ -134,12 +140,16 @@ public final class Annihilation extends JavaPlugin {
 	public DatabaseHandler getDatabaseHandler() {
 		return db;
 	}
+	
+	public KitManager getKitManager() {
+		return kits;
+	}
 
 	public int getPhaseDelay() {
 		return configManager.getConfig("config.yml").getInt("phase-period");
 	}
 
 	public void log(String m, Level l) {
-		Bukkit.getLogger().log(l, m);
+		getLogger().log(l, m);
 	}
 }
