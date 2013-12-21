@@ -15,6 +15,8 @@ import net.coasterman10.Annihilation.stats.StatsManager;
 import net.coasterman10.Annihilation.teams.Team;
 import net.coasterman10.Annihilation.teams.TeamManager;
 
+import org.apache.commons.lang.WordUtils;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.Configuration;
@@ -31,6 +33,7 @@ public final class Annihilation extends JavaPlugin {
 	private StatsManager stats;
 	private DatabaseHandler db;
 	private KitManager kits;
+	private IngameScoreboardManager ingameScoreboard;
 	public Boolean useMysql = false;
 
 	@Override
@@ -49,6 +52,7 @@ public final class Annihilation extends JavaPlugin {
 		stats = new StatsManager(this);
 		resources = new ResourceListener(this);
 		kits = new KitManager(this);
+		ingameScoreboard = new IngameScoreboardManager(this);
 
 		Configuration config = configManager.getConfig("config.yml");
 		timer = new PhaseTimer(this, config);
@@ -93,10 +97,10 @@ public final class Annihilation extends JavaPlugin {
 				Location spawn = maps.getSpawnPoint(t.getName());
 				p.teleport(spawn);
 				kits.getKit(p).getKitClass().give(p, t.getName());
-				teams.setMapName(maps.getCurrentMap().getName());
-				teams.showScoreboard();
-				teams.setScoreboardForPlayers(p);
+				ingameScoreboard.setCurrentForPlayers(p);
 			}
+
+			t.setNexusLocation(maps.getNexus(t.getName()));
 		}
 
 		resources.queueDiamondSpawn();
@@ -117,6 +121,8 @@ public final class Annihilation extends JavaPlugin {
 				getServer().broadcastMessage(
 						"Could not load " + voting.getWinner());
 			voting.end();
+			ingameScoreboard.setTitle(ChatColor.GOLD + "Map: "
+					+ WordUtils.capitalize(voting.getWinner()));
 		}
 
 		if (time == 0L)
@@ -162,15 +168,19 @@ public final class Annihilation extends JavaPlugin {
 	public VotingManager getVotingManager() {
 		return voting;
 	}
-	
+
 	public boolean isEmptyColumn(Location loc) {
 		boolean hasBlock = false;
 		Location test = loc.clone();
 		for (int y = 0; y < loc.getWorld().getMaxHeight(); y++) {
-		    test.setY(y);
-		    if (test.getBlock().getType() != Material.AIR)
-			hasBlock = true;
+			test.setY(y);
+			if (test.getBlock().getType() != Material.AIR)
+				hasBlock = true;
 		}
 		return !hasBlock;
+	}
+
+	public IngameScoreboardManager getIngameScoreboardmanager() {
+		return ingameScoreboard;
 	}
 }

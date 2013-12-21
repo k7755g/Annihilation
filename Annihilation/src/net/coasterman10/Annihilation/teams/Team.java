@@ -6,6 +6,7 @@ import java.util.Set;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 public class Team {
@@ -13,6 +14,7 @@ public class Team {
 	private final Set<String> playerNames = new HashSet<String>();
 	private boolean alive;
 	private int nexusHealth;
+	private Location nexusLocation;
 
 	public Team(int startingHealth, TeamName name) {
 		this.name = name;
@@ -66,5 +68,21 @@ public class Team {
 
 	public int getNexusHealth() {
 		return nexusHealth;
+	}
+
+	public void setNexusLocation(Location nexusLocation) {
+		this.nexusLocation = nexusLocation;
+	}
+
+	public Location getNexusLocation() {
+		return nexusLocation;
+	}
+
+	public void setNexusHealth(int nexusHealth) {
+		this.nexusHealth = nexusHealth;
+		if (this.nexusHealth < 0) {
+			this.nexusHealth = 0;
+			alive = false;
+		}
 	}
 }

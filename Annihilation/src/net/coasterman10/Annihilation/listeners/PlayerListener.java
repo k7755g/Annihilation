@@ -11,6 +11,8 @@ import net.coasterman10.Annihilation.teams.Team;
 import net.coasterman10.Annihilation.teams.TeamManager;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -75,7 +77,10 @@ public class PlayerListener implements Listener {
 							+ "', '0', '0', '0', '0', '0');");
 		}
 
-		plugin.getVotingManager().setCurrentForPlayers(player);
+		if (plugin.getPhase() == 0)
+			plugin.getVotingManager().setCurrentForPlayers(player);
+		else
+			plugin.getIngameScoreboardmanager().setCurrentForPlayers(player);
 	}
 
 	@EventHandler
@@ -123,6 +128,39 @@ public class PlayerListener implements Listener {
 		}
 	}
 
+	@EventHandler
+	public void onPlace(BlockPlaceEvent e) {
+		if (plugin.isEmptyColumn(e.getBlock().getLocation()))
+			e.setCancelled(true);
+	}
+
+	@EventHandler
+	public void onBreak(BlockBreakEvent e) {
+		if (plugin.isEmptyColumn(e.getBlock().getLocation()))
+			e.setCancelled(true);
+		for (Team t : teamManager.getTeams()) {
+			if (t.getNexusLocation().equals(e.getBlock().getLocation())) {
+				e.setCancelled(true);
+				Player breaker = e.getPlayer();
+				Team attackingTeam = teamManager.getTeamWithPlayer(breaker
+						.getName());
+				t.setNexusHealth(t.getNexusHealth() - 1);
+				plugin.getIngameScoreboardmanager().updateScore(t);
+				Location loc = e.getBlock().getLocation();
+				loc.getWorld().playSound(loc, Sound.ANVIL_LAND, 10F,
+						0.8F + (float) Math.random() * 0.2F);
+				if (attackingTeam != null) {
+					for (Player p : attackingTeam.getPlayers()) {
+						p.sendMessage(attackingTeam.getPrefix()
+								+ breaker.getName() + ChatColor.GRAY
+								+ " has damaged the " + t.getName() + " Nexus"
+								+ ChatColor.GRAY + "!");
+					}
+				}
+			}
+		}
+	}
+
 	private String createDeathMessage(Player victim, Player killer,
 			String message) {
 		Team victimTeam = teamManager.getTeamWithPlayer(victim.getName());
@@ -153,17 +191,5 @@ public class PlayerListener implements Listener {
 		deathMessage.replace("slain", "killed");
 
 		return deathMessage;
-	}
-
-	@EventHandler
-	public void onPlace(BlockPlaceEvent event) {
-		if (plugin.isEmptyColumn(event.getBlock().getLocation()))
-			event.setCancelled(true);
-	}
-
-	@EventHandler
-	public void onBreak(BlockBreakEvent event) {
-		if (plugin.isEmptyColumn(event.getBlock().getLocation()))
-			event.setCancelled(true);
 	}
 }
