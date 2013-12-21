@@ -92,6 +92,7 @@ public final class Annihilation extends JavaPlugin {
 			for (Player p : t.getPlayers()) {
 				Location spawn = maps.getSpawnPoint(t.getName());
 				p.teleport(spawn);
+				// HURR DURR EDIT
 				kits.getKit(p).getKitClass().give(p, t.getName());
 				teams.setMapName(maps.getCurrentMap().getName());
 				teams.showScoreboard();
