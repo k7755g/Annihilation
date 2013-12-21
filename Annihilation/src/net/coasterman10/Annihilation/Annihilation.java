@@ -16,6 +16,7 @@ import net.coasterman10.Annihilation.teams.Team;
 import net.coasterman10.Annihilation.teams.TeamManager;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -159,5 +160,16 @@ public final class Annihilation extends JavaPlugin {
 
 	public VotingManager getVotingManager() {
 		return voting;
+	}
+	
+	public boolean isEmptyColumn(Location loc) {
+		boolean hasBlock = false;
+		Location test = loc.clone();
+		for (int y = 0; y < loc.getWorld().getMaxHeight(); y++) {
+		    test.setY(y);
+		    if (test.getBlock().getType() != Material.AIR)
+			hasBlock = true;
+		}
+		return !hasBlock;
 	}
 }

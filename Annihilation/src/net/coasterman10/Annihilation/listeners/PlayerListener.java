@@ -13,8 +13,10 @@ import net.coasterman10.Annihilation.teams.TeamManager;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -146,5 +148,17 @@ public class PlayerListener implements Listener {
 		deathMessage.replace("slain", "killed");
 
 		return deathMessage;
+	}
+	
+	@EventHandler
+	public void onPlace(BlockPlaceEvent event) {
+		if (plugin.isEmptyColumn(event.getBlock().getLocation()))
+			event.setCancelled(true);
+	}
+	
+	@EventHandler
+	public void onBreak(BlockBreakEvent event) {
+		if (plugin.isEmptyColumn(event.getBlock().getLocation()))
+			event.setCancelled(true);
 	}
 }
