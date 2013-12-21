@@ -1,6 +1,7 @@
 package net.coasterman10.Annihilation.stats;
 
 import java.io.IOException;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import net.coasterman10.Annihilation.Annihilation;
@@ -24,7 +25,14 @@ public class StatsManager {
 			return yml.getInt(p.getName() + "." + s.name());
 		} else {
 			try {
-				return plugin.getDatabaseHandler().query("SELECT * FROM `annihilation` WHERE `username`='" + p.getName() + "'").getResultSet().getInt(s.name().toLowerCase());
+				int stat = -5;
+				
+				ResultSet rs = plugin.getDatabaseHandler().query("SELECT * FROM `annihilation` WHERE `username`='" + p.getName() + "'").getResultSet();
+				
+				while (rs.next())
+					stat = rs.getInt(s.name().toLowerCase());
+				
+				return stat;
 			} catch (SQLException ex) {
 				ex.printStackTrace();
 				return -5;
