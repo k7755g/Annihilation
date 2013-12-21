@@ -5,7 +5,7 @@ start-delay: 120
 phase-period: 600
 
 # Stat system: "flatfile" for yml or "sql" for MySQL
-stats: sql
+stats: flatfile
 
 MySQL:
     port: 3306

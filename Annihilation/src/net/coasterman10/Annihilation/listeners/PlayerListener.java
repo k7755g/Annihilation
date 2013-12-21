@@ -10,6 +10,7 @@ import net.coasterman10.Annihilation.stats.StatType;
 import net.coasterman10.Annihilation.teams.Team;
 import net.coasterman10.Annihilation.teams.TeamManager;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -86,25 +87,62 @@ public class PlayerListener implements Listener {
 						p.getKiller(),
 						plugin.getStatsManager().getStat(StatType.DEATHS,
 								p.getKiller()) + 1);
+				e.setDeathMessage(createDeathMessage(p, p.getKiller(),
+						e.getDeathMessage()));
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
-		}
+		} else
+			e.setDeathMessage(createDeathMessage(p, e.getDeathMessage()));
 	}
-	
+
 	@EventHandler
 	public void onPlayerAttack(EntityDamageByEntityEvent e) {
 		Entity damager = e.getDamager();
 		if (damager instanceof Player) {
 			Player attacker = (Player) damager;
-			if (kitManager.getKit(attacker) ==  KitType.WARRIOR) {
+			if (kitManager.getKit(attacker) == KitType.WARRIOR) {
 				ItemStack hand = attacker.getItemInHand();
 				if (hand != null) {
-					String lowercaseName = hand.getType().toString().toLowerCase();
-					if (lowercaseName.contains("sword") || lowercaseName.contains("axe"))
+					String lowercaseName = hand.getType().toString()
+							.toLowerCase();
+					if (lowercaseName.contains("sword")
+							|| lowercaseName.contains("axe"))
 						e.setDamage(e.getDamage() + 1.0);
 				}
 			}
 		}
+	}
+
+	private String createDeathMessage(Player victim, Player killer,
+			String message) {
+		Team victimTeam = teamManager.getTeamWithPlayer(victim.getName());
+		Team killerTeam = teamManager.getTeamWithPlayer(killer.getName());
+		String victimColor = victimTeam != null ? victimTeam.getPrefix()
+				: ChatColor.DARK_PURPLE.toString();
+		String killerColor = killerTeam != null ? killerTeam.getPrefix()
+				: ChatColor.DARK_PURPLE.toString();
+
+		String victimName = victimColor + victim.getName() + ChatColor.GRAY;
+		String killerName = killerColor + killer.getName();
+
+		String deathMessage = message.replace(victim.getName(), victimName);
+		deathMessage = deathMessage.replace(killer.getName(), killerName);
+		deathMessage.replace("slain", "killed");
+
+		return deathMessage;
+	}
+
+	private String createDeathMessage(Player victim, String message) {
+		Team victimTeam = teamManager.getTeamWithPlayer(victim.getName());
+		String victimColor = victimTeam != null ? victimTeam.getPrefix()
+				: ChatColor.DARK_PURPLE.toString();
+
+		String victimName = victimColor + victim.getName() + ChatColor.GRAY;
+
+		String deathMessage = message.replace(victim.getName(), victimName);
+		deathMessage.replace("slain", "killed");
+
+		return deathMessage;
 	}
 }
