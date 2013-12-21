@@ -23,8 +23,11 @@ public class StatsManager {
 		if (!plugin.useMysql) {
 			return yml.getInt(p.getName() + "." + s.name());
 		} else {
+			plugin.getLogger().info("Making query");
 			try {
-				return plugin.getDatabaseHandler().query("SELECT * FROM `annihilation` WHERE `username`='" + p.getName() + "'").getResultSet().getInt(s.name().toLowerCase());
+				String query = "SELECT * FROM `annihilation` WHERE `username`='" + p.getName() + "';";
+				plugin.getLogger().info(query); 
+				return plugin.getDatabaseHandler().query(query).getResultSet().getInt(s.name().toLowerCase());
 			} catch (SQLException ex) {
 				ex.printStackTrace();
 				return -5;
@@ -37,7 +40,9 @@ public class StatsManager {
 			yml.set(p.getName() + "." + s.name(), value);
 			plugin.getConfigManager().save("stats.yml");
 		} else {
-			plugin.getDatabaseHandler().query("UPDATE `" + s.name().toLowerCase() + "`='" + value + "' WHERE `username`='" + p.getName() + "'");
+			String query = "UPDATE `" + s.name().toLowerCase() + "`='" + value + "' WHERE `username`='" + p.getName() + "';";
+			plugin.getDatabaseHandler().query(query);
+			plugin.getLogger().info(query);
 		}
 	}
 }
