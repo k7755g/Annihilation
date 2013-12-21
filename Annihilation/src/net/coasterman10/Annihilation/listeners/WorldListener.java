@@ -5,7 +5,7 @@ import net.coasterman10.Annihilation.Annihilation;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 
 public class WorldListener implements Listener {
     
@@ -23,8 +23,7 @@ public class WorldListener implements Listener {
     }
 
     @EventHandler
-    public void onBlockPlace(BlockPlaceEvent e) {
-	if (plugin.isEmptyColumn(e.getBlock().getLocation()))
-	    e.setCancelled(true);
-    }
+	public void onSpawn(CreatureSpawnEvent event) {
+		event.setCancelled(true);
+	}
 }
