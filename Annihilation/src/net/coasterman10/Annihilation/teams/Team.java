@@ -12,10 +12,12 @@ public class Team {
 	private final TeamName name;
 	private final Set<String> playerNames = new HashSet<String>();
 	private boolean alive;
+	private int nexusHealth;
 
-	public Team(TeamName name) {
+	public Team(int startingHealth, TeamName name) {
 		this.name = name;
 		alive = true;
+		nexusHealth = startingHealth;
 	}
 
 	public void addPlayer(String name) {
@@ -60,5 +62,9 @@ public class Team {
 
 	public boolean isAlive() {
 		return alive;
+	}
+
+	public int getNexusHealth() {
+		return nexusHealth;
 	}
 }

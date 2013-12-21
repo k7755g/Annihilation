@@ -67,6 +67,8 @@ public class PlayerListener implements Listener {
 							+ player.getName()
 							+ "', '0', '0', '0', '0', '0');");
 		}
+
+		plugin.getVotingManager().setCurrentForPlayers(player);
 	}
 
 	@EventHandler
