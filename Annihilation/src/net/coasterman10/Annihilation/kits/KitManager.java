@@ -25,15 +25,10 @@ public class KitManager {
 	}
 
 	public void setKit(Player p, KitType kit) {
-		KitType oldKit = getKit(p);
 		if (kit == null)
 			playerKits.put(p.getName(), KitType.CIVILIAN);
 		else
 			playerKits.put(p.getName(), kit);
-		
-		if (!oldKit.equals(kit)) {
-			p.setHealth(0.0);
-		}
 	}
 
 	public boolean hasKit(Player player, KitType kit) {

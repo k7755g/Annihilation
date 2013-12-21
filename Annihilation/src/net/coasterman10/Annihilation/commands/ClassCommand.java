@@ -35,6 +35,7 @@ public class ClassCommand implements CommandExecutor {
 							+ kit.getKitClass().getName());
 				} else if (kit != null) {
 					kitManager.setKit((Player) sender, kit);
+					((Player) sender).setHealth(0.0);
 				} else {
 					sender.sendMessage("\"" + args[0]
 							+ "\" is not a valid class.");

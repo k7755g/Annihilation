@@ -47,7 +47,12 @@ public class PlayerListener implements Listener {
 			e.setRespawnLocation(mapManager.getLobbySpawnPoint());
 		else {
 			e.setRespawnLocation(mapManager.getSpawnPoint(team.getName()));
-			plugin.getKitManager().getKit(player).getKitClass().give(player);
+			plugin.getKitManager()
+					.getKit(player)
+					.getKitClass()
+					.give(player,
+							teamManager.getTeamWithPlayer(player.getName())
+									.getName());
 		}
 	}
 
@@ -149,13 +154,13 @@ public class PlayerListener implements Listener {
 
 		return deathMessage;
 	}
-	
+
 	@EventHandler
 	public void onPlace(BlockPlaceEvent event) {
 		if (plugin.isEmptyColumn(event.getBlock().getLocation()))
 			event.setCancelled(true);
 	}
-	
+
 	@EventHandler
 	public void onBreak(BlockBreakEvent event) {
 		if (plugin.isEmptyColumn(event.getBlock().getLocation()))
