@@ -37,7 +37,9 @@ public class StatsManager {
 			yml.set(p.getName() + "." + s.name(), value);
 			plugin.getConfigManager().save("stats.yml");
 		} else {
-			plugin.getDatabaseHandler().query("UPDATE `" + s.name().toLowerCase() + "`='" + value + "' WHERE `username`='" + p.getName() + "'");
+			String query = "UPDATE `annihilation` SET `" + s.name().toLowerCase() + "` = '" + value + "' WHERE `username` = '" + p.getName() + "';";
+			plugin.getDatabaseHandler().query(query);
+			plugin.getLogger().info(query);
 		}
 	}
 }
