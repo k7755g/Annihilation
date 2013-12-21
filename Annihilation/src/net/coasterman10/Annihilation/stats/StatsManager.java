@@ -54,4 +54,12 @@ public class StatsManager {
 							+ p.getName() + "';");
 		}
 	}
+
+	public void incrementStat(StatType s, Player p) {
+		try {
+			setValue(s, p, getStat(s, p) + 1);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }
