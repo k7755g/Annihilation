@@ -37,15 +37,18 @@ public class TeamCommand implements CommandExecutor {
 	}
 
 	private void joinTeam(Player player, String team) {
-		if (!teamManager.inLobby(player.getName())) {
-			Team currentTeam = teamManager.getTeamWithPlayer(player.getName());
+		if (!teamManager.inLobby(player)) {
+			Team currentTeam = teamManager.getTeamWithPlayer(player);
 			player.sendMessage(ChatColor.RED + "You are already on "
 					+ currentTeam.getFullName() + "!");
 			return;
 		}
 
-		Team target = teamManager.getTeam(TeamName.valueOf(team.toUpperCase()));
-		if (target == null) {
+		Team target;
+		try {
+			target = teamManager.getTeam(TeamName.valueOf(team
+					.toUpperCase()));
+		} catch (IllegalArgumentException e) {
 			player.sendMessage(ChatColor.RED + "\"" + team
 					+ "\" is not a valid team name!");
 			listTeams(player);

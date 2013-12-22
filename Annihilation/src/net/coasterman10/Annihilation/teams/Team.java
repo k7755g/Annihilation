@@ -12,14 +12,10 @@ import org.bukkit.entity.Player;
 public class Team {
 	private final TeamName name;
 	private final Set<String> playerNames = new HashSet<String>();
-	private boolean alive;
-	private int nexusHealth;
-	private Location nexusLocation;
+	private Nexus nexus;
 
-	public Team(int startingHealth, TeamName name) {
+	public Team(TeamName name) {
 		this.name = name;
-		alive = true;
-		nexusHealth = startingHealth;
 	}
 
 	public void addPlayer(String name) {
@@ -46,8 +42,8 @@ public class Team {
 		return players;
 	}
 
-	public boolean hasPlayer(String name) {
-		return playerNames.contains(name);
+	public boolean hasPlayer(Player breaker) {
+		return playerNames.contains(breaker.getName());
 	}
 
 	public TeamName getName() {
@@ -63,26 +59,14 @@ public class Team {
 	}
 
 	public boolean isAlive() {
-		return alive;
+		return nexus.getHealth() > 0;
 	}
 
-	public int getNexusHealth() {
-		return nexusHealth;
+	public Nexus getNexus() {
+		return nexus;
 	}
 
-	public void setNexusLocation(Location nexusLocation) {
-		this.nexusLocation = nexusLocation;
-	}
-
-	public Location getNexusLocation() {
-		return nexusLocation;
-	}
-
-	public void setNexusHealth(int nexusHealth) {
-		this.nexusHealth = nexusHealth;
-		if (this.nexusHealth < 0) {
-			this.nexusHealth = 0;
-			alive = false;
-		}
+	public void loadNexus(Location location, int health) {
+		nexus = new Nexus(this, location, health);
 	}
 }

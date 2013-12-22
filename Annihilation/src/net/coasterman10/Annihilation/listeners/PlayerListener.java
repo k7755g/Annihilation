@@ -3,6 +3,7 @@ package net.coasterman10.Annihilation.listeners;
 import java.io.IOException;
 
 import net.coasterman10.Annihilation.Annihilation;
+import net.coasterman10.Annihilation.ChatUtil;
 import net.coasterman10.Annihilation.kits.KitManager;
 import net.coasterman10.Annihilation.kits.KitType;
 import net.coasterman10.Annihilation.maps.MapManager;
@@ -10,11 +11,7 @@ import net.coasterman10.Annihilation.stats.StatType;
 import net.coasterman10.Annihilation.teams.Team;
 import net.coasterman10.Annihilation.teams.TeamManager;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -44,7 +41,7 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onPlayerRespawn(PlayerRespawnEvent e) {
 		Player player = e.getPlayer();
-		Team team = teamManager.getTeamWithPlayer(player.getName());
+		Team team = teamManager.getTeamWithPlayer(player);
 		if (team == null)
 			e.setRespawnLocation(mapManager.getLobbySpawnPoint());
 		else if (!team.isAlive() || plugin.getPhase() == 0)
@@ -55,15 +52,14 @@ public class PlayerListener implements Listener {
 					.getKit(player)
 					.getKitClass()
 					.give(player,
-							teamManager.getTeamWithPlayer(player.getName())
-									.getName());
+							teamManager.getTeamWithPlayer(player).getName());
 		}
 	}
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
 		Player player = e.getPlayer();
-		Team team = teamManager.getTeamWithPlayer(player.getName());
+		Team team = teamManager.getTeamWithPlayer(player);
 		if (team == null)
 			player.teleport(mapManager.getLobbySpawnPoint());
 		else if (!team.isAlive() || plugin.getPhase() == 0)
@@ -140,57 +136,22 @@ public class PlayerListener implements Listener {
 	public void onBreak(BlockBreakEvent e) {
 		if (plugin.isEmptyColumn(e.getBlock().getLocation()))
 			e.setCancelled(true);
-		for (Team t : teamManager.getTeams()) {
-			if (t.getNexusLocation().equals(e.getBlock().getLocation())) {
+		for (Team t : plugin.getTeamManager().getTeams()) {
+			if (t.getNexus().getLocation().equals(e.getBlock().getLocation())) {
 				e.setCancelled(true);
 				Player breaker = e.getPlayer();
-				plugin.getStatsManager().incrementStat(StatType.NEXUS_DAMAGE,
-						breaker);
-				Team attackingTeam = teamManager.getTeamWithPlayer(breaker
-						.getName());
-				t.setNexusHealth(t.getNexusHealth() - 1);
-				plugin.getIngameScoreboardmanager().updateScore(t);
-				Location loc = e.getBlock().getLocation();
-				loc.getWorld().playSound(loc, Sound.ANVIL_LAND, 10F,
-						0.8F + (float) Math.random() * 0.2F);
-				for (Player p : attackingTeam.getPlayers()) {
-					p.sendMessage(attackingTeam.getPrefix() + breaker.getName()
-							+ ChatColor.GRAY + " has damaged the "
-							+ t.getName() + " Nexus" + ChatColor.GRAY + "!");
-				}
-				if (!t.isAlive()) {
-					e.getBlock().setType(Material.BEDROCK);
-					Bukkit.broadcastMessage(ChatColor.GRAY
-							+ "===============[ " + ChatColor.DARK_AQUA
-							+ "Nexus Destroyed" + ChatColor.GRAY
-							+ " ]===============");
-					Bukkit.broadcastMessage(t.getFullName() + "'s Nexus"
-							+ ChatColor.GRAY + " has been destroyed by "
-							+ attackingTeam.getFullName());
-					Bukkit.broadcastMessage(ChatColor.GRAY
-							+ "=============================================");
-					for (Player p : t.getPlayers())
-						plugin.getStatsManager().incrementStat(StatType.LOSSES,
-								p);
-
-					boolean oneTeamLeft = false;
-					for (Team team : teamManager.getTeams()) {
-						if (team.isAlive())
-							oneTeamLeft = !oneTeamLeft;
+				Team attacker = teamManager.getTeamWithPlayer(breaker);
+				if (t == attacker) {
+					breaker.sendMessage(ChatColor.AQUA + "You can't damage your own nexus");
+				} else {
+					plugin.getStatsManager().incrementStat(StatType.NEXUS_DAMAGE,
+							breaker);
+					t.getNexus().damage();
+					if (t.getNexus().getHealth() == 0) {
+						ChatUtil.nexusDestroyed(t, attacker);
 					}
-					if (oneTeamLeft) {
-						for (Team team : teamManager.getTeams()) {
-							Bukkit.broadcastMessage(ChatColor.GRAY
-									+ "==========[ " + ChatColor.DARK_AQUA
-									+ "End Game" + ChatColor.GRAY
-									+ " ]==========");
-							Bukkit.broadcastMessage(team.getFullName()
-									+ " wins!");
-							Bukkit.broadcastMessage(ChatColor.GRAY
-									+ "=========================");
-							for (Player p : team.getPlayers())
-								plugin.getStatsManager().incrementStat(StatType.WINS, p);
-						}
+					for (Player p : t.getPlayers()) {
+						plugin.getStatsManager().incrementStat(StatType.LOSSES, p);
 					}
 				}
 			}
@@ -199,8 +160,8 @@ public class PlayerListener implements Listener {
 
 	private String createDeathMessage(Player victim, Player killer,
 			String message) {
-		Team victimTeam = teamManager.getTeamWithPlayer(victim.getName());
-		Team killerTeam = teamManager.getTeamWithPlayer(killer.getName());
+		Team victimTeam = teamManager.getTeamWithPlayer(victim);
+		Team killerTeam = teamManager.getTeamWithPlayer(killer);
 		String victimColor = victimTeam != null ? victimTeam.getPrefix()
 				: ChatColor.DARK_PURPLE.toString();
 		String killerColor = killerTeam != null ? killerTeam.getPrefix()
@@ -217,7 +178,7 @@ public class PlayerListener implements Listener {
 	}
 
 	private String createDeathMessage(Player victim, String message) {
-		Team victimTeam = teamManager.getTeamWithPlayer(victim.getName());
+		Team victimTeam = teamManager.getTeamWithPlayer(victim);
 		String victimColor = victimTeam != null ? victimTeam.getPrefix()
 				: ChatColor.DARK_PURPLE.toString();
 

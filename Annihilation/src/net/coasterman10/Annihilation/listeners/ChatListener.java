@@ -26,7 +26,7 @@ public class ChatListener implements Listener {
 		String WHITE = ChatColor.WHITE.toString();
 
 		String username = e.getPlayer().getName();
-		Team team = teamManager.getTeamWithPlayer(username);
+		Team team = teamManager.getTeamWithPlayer(e.getPlayer());
 		String group;
 		String message = e.getMessage();
 

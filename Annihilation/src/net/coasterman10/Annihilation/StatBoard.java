@@ -49,4 +49,8 @@ public class StatBoard {
 			p.setScoreboard(board);
 		}
 	}
+
+	public void removeScore(String name) {
+		board.resetScores(Bukkit.getOfflinePlayer(name));
+	}
 }

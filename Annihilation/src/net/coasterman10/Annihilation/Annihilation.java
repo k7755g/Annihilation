@@ -100,7 +100,8 @@ public final class Annihilation extends JavaPlugin {
 				ingameScoreboard.setCurrentForPlayers(p);
 			}
 
-			t.setNexusLocation(maps.getNexus(t.getName()));
+			t.loadNexus(maps.getNexus(t.getName()), 75);
+			ingameScoreboard.updateScore(t);
 		}
 
 		resources.queueDiamondSpawn();
@@ -182,5 +183,9 @@ public final class Annihilation extends JavaPlugin {
 
 	public IngameScoreboardManager getIngameScoreboardmanager() {
 		return ingameScoreboard;
+	}
+
+	public void endGame(Team winner) {
+
 	}
 }

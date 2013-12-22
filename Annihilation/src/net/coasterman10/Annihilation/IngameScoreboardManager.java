@@ -18,7 +18,7 @@ public class IngameScoreboardManager {
 		}
 		nexusBoard.show();
 	}
-	
+
 	public void setTitle(String title) {
 		nexusBoard.setTitle(title);
 	}
@@ -28,6 +28,11 @@ public class IngameScoreboardManager {
 	}
 
 	public void updateScore(Team team) {
-		nexusBoard.setScore(team.getName() + " Nexus", team.getNexusHealth());
+		if (team.getNexus() != null) {
+			nexusBoard.setScore(team.getName() + " Nexus", team.getNexus()
+					.getHealth());
+			if (team.getNexus().getHealth() == 0)
+				nexusBoard.removeScore(team.getName() + " Nexus");
+		}
 	}
 }
