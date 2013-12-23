@@ -1,6 +1,5 @@
 package net.coasterman10.Annihilation.stats;
 
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -43,7 +42,7 @@ public class StatsManager {
 		}
 	}
 
-	public void setValue(StatType s, Player p, int value) throws IOException {
+	public void setValue(StatType s, Player p, int value) {
 		if (!plugin.useMysql) {
 			yml.set(p.getName() + "." + s.name(), value);
 			plugin.getConfigManager().save("stats.yml");
@@ -56,10 +55,6 @@ public class StatsManager {
 	}
 
 	public void incrementStat(StatType s, Player p) {
-		try {
-			setValue(s, p, getStat(s, p) + 1);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		setValue(s, p, getStat(s, p) + 1);
 	}
 }

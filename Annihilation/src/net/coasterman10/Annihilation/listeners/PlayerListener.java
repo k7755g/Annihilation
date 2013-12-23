@@ -1,9 +1,11 @@
 package net.coasterman10.Annihilation.listeners;
 
-import java.io.IOException;
+import java.util.Iterator;
+import java.util.Random;
 
 import net.coasterman10.Annihilation.Annihilation;
-import net.coasterman10.Annihilation.ChatUtil;
+import net.coasterman10.Annihilation.chat.ChatUtil;
+import net.coasterman10.Annihilation.chat.DeathMessageFormatter;
 import net.coasterman10.Annihilation.kits.KitManager;
 import net.coasterman10.Annihilation.kits.KitType;
 import net.coasterman10.Annihilation.maps.MapManager;
@@ -12,6 +14,8 @@ import net.coasterman10.Annihilation.teams.Team;
 import net.coasterman10.Annihilation.teams.TeamManager;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,15 +24,18 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 public class PlayerListener implements Listener {
 	private final Annihilation plugin;
 	private final MapManager mapManager;
 	private final TeamManager teamManager;
 	private final KitManager kitManager;
+	private final DeathMessageFormatter deathMessages;
 
 	public PlayerListener(Annihilation plugin) {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
@@ -36,6 +43,7 @@ public class PlayerListener implements Listener {
 		mapManager = plugin.getMapManager();
 		teamManager = plugin.getTeamManager();
 		kitManager = plugin.getKitManager();
+		deathMessages = new DeathMessageFormatter(teamManager);
 	}
 
 	@EventHandler
@@ -85,27 +93,27 @@ public class PlayerListener implements Listener {
 	public void onPlayerDeath(PlayerDeathEvent e) {
 		Player p = e.getEntity();
 
-		try {
-			plugin.getStatsManager().setValue(StatType.DEATHS, p,
-					plugin.getStatsManager().getStat(StatType.DEATHS, p) + 1);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-		}
+		plugin.getStatsManager().setValue(StatType.DEATHS, p,
+				plugin.getStatsManager().getStat(StatType.DEATHS, p) + 1);
 
 		if (p.getKiller() != null) {
-			try {
-				plugin.getStatsManager().setValue(
-						StatType.KILLS,
-						p.getKiller(),
-						plugin.getStatsManager().getStat(StatType.DEATHS,
-								p.getKiller()) + 1);
-				e.setDeathMessage(createDeathMessage(p, p.getKiller(),
-						e.getDeathMessage()));
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}
+			plugin.getStatsManager().setValue(
+					StatType.KILLS,
+					p.getKiller(),
+					plugin.getStatsManager().getStat(StatType.DEATHS,
+							p.getKiller()) + 1);
+			e.setDeathMessage(deathMessages.formatDeathMessage(p,
+					p.getKiller(), e.getDeathMessage()));
 		} else
-			e.setDeathMessage(createDeathMessage(p, e.getDeathMessage()));
+			e.setDeathMessage(deathMessages.formatDeathMessage(p,
+					e.getDeathMessage()));
+
+		Iterator<ItemStack> iterator = e.getDrops().iterator();
+		while (iterator.hasNext()) {
+			if (isSoulbound(iterator.next()))
+				iterator.remove();
+		}
+		e.setDroppedExp(p.getTotalExperience());
 	}
 
 	@EventHandler
@@ -142,51 +150,40 @@ public class PlayerListener implements Listener {
 				Player breaker = e.getPlayer();
 				Team attacker = teamManager.getTeamWithPlayer(breaker);
 				if (t == attacker) {
-					breaker.sendMessage(ChatColor.AQUA + "You can't damage your own nexus");
+					breaker.sendMessage(ChatColor.AQUA
+							+ "You can't damage your own nexus");
 				} else {
-					plugin.getStatsManager().incrementStat(StatType.NEXUS_DAMAGE,
-							breaker);
 					t.getNexus().damage();
+					plugin.getStatsManager().incrementStat(
+							StatType.NEXUS_DAMAGE, breaker);
+					for (Player p : attacker.getPlayers())
+						p.sendMessage(ChatUtil.nexusBreakMessage(breaker,
+								attacker, t));
+					plugin.getIngameScoreboardmanager().updateScore(t);
 					if (t.getNexus().getHealth() == 0) {
-						ChatUtil.nexusDestroyed(t, attacker);
+						ChatUtil.nexusDestroyed(attacker, t);
 					}
 					for (Player p : t.getPlayers()) {
-						plugin.getStatsManager().incrementStat(StatType.LOSSES, p);
+						plugin.getStatsManager().incrementStat(StatType.LOSSES,
+								p);
 					}
 				}
 			}
 		}
 	}
 
-	private String createDeathMessage(Player victim, Player killer,
-			String message) {
-		Team victimTeam = teamManager.getTeamWithPlayer(victim);
-		Team killerTeam = teamManager.getTeamWithPlayer(killer);
-		String victimColor = victimTeam != null ? victimTeam.getPrefix()
-				: ChatColor.DARK_PURPLE.toString();
-		String killerColor = killerTeam != null ? killerTeam.getPrefix()
-				: ChatColor.DARK_PURPLE.toString();
-
-		String victimName = victimColor + victim.getName() + ChatColor.GRAY;
-		String killerName = killerColor + killer.getName();
-
-		String deathMessage = message.replace(victim.getName(), victimName);
-		deathMessage = deathMessage.replace(killer.getName(), killerName);
-		deathMessage.replace("slain", "killed");
-
-		return deathMessage;
+	@EventHandler
+	public void onDrop(PlayerDropItemEvent e) {
+		if (isSoulbound(e.getItemDrop().getItemStack()))
+			e.getItemDrop().getItemStack().setType(Material.AIR);
+		e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.BLAZE_HIT,
+				1F, 1F + new Random().nextFloat() * 0.25F);
 	}
 
-	private String createDeathMessage(Player victim, String message) {
-		Team victimTeam = teamManager.getTeamWithPlayer(victim);
-		String victimColor = victimTeam != null ? victimTeam.getPrefix()
-				: ChatColor.DARK_PURPLE.toString();
-
-		String victimName = victimColor + victim.getName() + ChatColor.GRAY;
-
-		String deathMessage = message.replace(victim.getName(), victimName);
-		deathMessage.replace("slain", "killed");
-
-		return deathMessage;
+	private boolean isSoulbound(ItemStack item) {
+		ItemMeta meta = item.getItemMeta();
+		if (meta.hasLore())
+			return meta.getLore().contains(ChatColor.GOLD + "Soulbound");
+		return false;
 	}
 }

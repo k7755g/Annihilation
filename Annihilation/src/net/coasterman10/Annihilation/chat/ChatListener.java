@@ -1,4 +1,4 @@
-package net.coasterman10.Annihilation.listeners;
+package net.coasterman10.Annihilation.chat;
 
 import net.coasterman10.Annihilation.Annihilation;
 import net.coasterman10.Annihilation.teams.Team;

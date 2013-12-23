@@ -21,6 +21,8 @@ public class WorldListener implements Listener {
 			add(EntityType.ZOMBIE);
 			add(EntityType.SPIDER);
 			add(EntityType.BAT);
+			add(EntityType.ENDERMAN);
+			add(EntityType.SLIME);
 		}
 	};
 

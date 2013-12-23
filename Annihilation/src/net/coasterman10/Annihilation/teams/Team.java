@@ -42,8 +42,8 @@ public class Team {
 		return players;
 	}
 
-	public boolean hasPlayer(Player breaker) {
-		return playerNames.contains(breaker.getName());
+	public boolean hasPlayer(Player player) {
+		return playerNames.contains(player.getName());
 	}
 
 	public TeamName getName() {
@@ -59,6 +59,8 @@ public class Team {
 	}
 
 	public boolean isAlive() {
+		if (nexus == null)
+			return false;
 		return nexus.getHealth() > 0;
 	}
 

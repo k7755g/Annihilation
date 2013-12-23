@@ -2,9 +2,9 @@ package net.coasterman10.Annihilation;
 
 import java.util.logging.Level;
 
+import net.coasterman10.Annihilation.chat.ChatListener;
 import net.coasterman10.Annihilation.commands.AnnihilationCommand;
 import net.coasterman10.Annihilation.kits.KitManager;
-import net.coasterman10.Annihilation.listeners.ChatListener;
 import net.coasterman10.Annihilation.listeners.PlayerListener;
 import net.coasterman10.Annihilation.listeners.ResourceListener;
 import net.coasterman10.Annihilation.listeners.WorldListener;
