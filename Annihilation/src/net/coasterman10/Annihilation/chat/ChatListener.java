@@ -33,7 +33,7 @@ public class ChatListener implements Listener {
 
 		if (team == null) {
 			String color = ChatColor.DARK_PURPLE.toString();
-			group = GRAY + "[" + color + "Lobby" + GRAY + "]";
+			group = DARK_GRAY + "[" + color + "Lobby" + DARK_GRAY + "]";
 
 			if (message.startsWith("!"))
 				message = message.substring(1);
