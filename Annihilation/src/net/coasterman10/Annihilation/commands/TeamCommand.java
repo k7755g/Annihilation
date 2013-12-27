@@ -46,8 +46,7 @@ public class TeamCommand implements CommandExecutor {
 
 		Team target;
 		try {
-			target = teamManager.getTeam(TeamName.valueOf(team
-					.toUpperCase()));
+			target = teamManager.getTeam(TeamName.valueOf(team.toUpperCase()));
 		} catch (IllegalArgumentException e) {
 			player.sendMessage(ChatColor.RED + "\"" + team
 					+ "\" is not a valid team name!");
@@ -62,6 +61,8 @@ public class TeamCommand implements CommandExecutor {
 		if (plugin.getPhase() > 0) {
 			player.teleport(plugin.getMapManager().getSpawnPoint(
 					target.getName()));
+			plugin.getKitManager().getKit(player).getKitClass()
+					.give(player, target.getName());
 		}
 	}
 

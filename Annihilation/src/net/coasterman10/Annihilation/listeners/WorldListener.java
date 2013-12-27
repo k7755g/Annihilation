@@ -23,6 +23,7 @@ public class WorldListener implements Listener {
 			add(EntityType.BAT);
 			add(EntityType.ENDERMAN);
 			add(EntityType.SLIME);
+			add(EntityType.WITCH);
 		}
 	};
 

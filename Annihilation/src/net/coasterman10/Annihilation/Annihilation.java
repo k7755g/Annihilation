@@ -3,10 +3,13 @@ package net.coasterman10.Annihilation;
 import java.util.logging.Level;
 
 import net.coasterman10.Annihilation.chat.ChatListener;
+import net.coasterman10.Annihilation.chat.ChatUtil;
 import net.coasterman10.Annihilation.commands.AnnihilationCommand;
 import net.coasterman10.Annihilation.kits.KitManager;
 import net.coasterman10.Annihilation.listeners.PlayerListener;
 import net.coasterman10.Annihilation.listeners.ResourceListener;
+import net.coasterman10.Annihilation.listeners.SoulboundListener;
+import net.coasterman10.Annihilation.listeners.WandListener;
 import net.coasterman10.Annihilation.listeners.WorldListener;
 import net.coasterman10.Annihilation.maps.MapManager;
 import net.coasterman10.Annihilation.maps.VotingManager;
@@ -63,6 +66,8 @@ public final class Annihilation extends JavaPlugin {
 		new ChatListener(this);
 		new PlayerListener(this);
 		new WorldListener(this);
+		new SoulboundListener(this);
+		new WandListener(this);
 
 		voting.setCurrentForPlayers(getServer().getOnlinePlayers());
 
@@ -104,11 +109,13 @@ public final class Annihilation extends JavaPlugin {
 			ingameScoreboard.updateScore(t);
 		}
 
-		resources.queueDiamondSpawn();
+		resources.loadDiamonds();
 	}
 
 	public void advancePhase() {
-
+		ChatUtil.phaseMessage(timer.getPhase());
+		if (timer.getPhase() == 3)
+			resources.spawnDiamonds();
 	}
 
 	public void onSecond() {

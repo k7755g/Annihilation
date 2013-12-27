@@ -1,17 +1,15 @@
 package net.coasterman10.Annihilation.kits;
 
-import java.util.Arrays;
 import java.util.List;
 
+import net.coasterman10.Annihilation.listeners.SoulboundListener;
 import net.coasterman10.Annihilation.teams.TeamName;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 public abstract class AbstractKit {
@@ -22,7 +20,7 @@ public abstract class AbstractKit {
 		List<ItemStack> spawnItems = getSpawnItems();
 		for (ItemStack item : spawnItems) {
 			ItemStack toGive = item.clone();
-			soulbind(toGive);
+			SoulboundListener.soulbind(toGive);
 			inv.addItem(toGive);
 		}
 		
@@ -30,7 +28,7 @@ public abstract class AbstractKit {
 		colorizeArmor(inv, getTeamColor(team));
 		
 		for (ItemStack armor : inv.getArmorContents())
-			soulbind(armor);
+			SoulboundListener.soulbind(armor);
 	}
 
 	public abstract String getName();
@@ -56,15 +54,6 @@ public abstract class AbstractKit {
 				item.setItemMeta(meta);
 			}
 		}
-	}
-
-	private void soulbind(ItemStack stack) {
-		ItemMeta meta = stack.getItemMeta();
-		if (!meta.hasLore())
-			meta.setLore(Arrays.asList(ChatColor.GOLD + "Soulbound"));
-		else
-			meta.getLore().add(ChatColor.GOLD + "Soulbound");
-		stack.setItemMeta(meta);
 	}
 
 	private Color getTeamColor(TeamName team) {

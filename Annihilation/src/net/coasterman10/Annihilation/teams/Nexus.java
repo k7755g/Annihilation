@@ -1,6 +1,6 @@
 package net.coasterman10.Annihilation.teams;
 
-import java.util.Random;
+import net.coasterman10.Annihilation.SoundUtil;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -32,8 +32,8 @@ public class Nexus {
 
 	public void damage() {
 		health--;
-		location.getWorld().playSound(location, Sound.ANVIL_LAND, 10F,
-				0.5F + new Random().nextFloat() * 0.5F);
+		SoundUtil.playSound(location, Sound.ANVIL_LAND, 10F, 0.5F, 1F);
+		SoundUtil.playSoundForTeam(owner, Sound.NOTE_PIANO, 1F, 1.6F, 1.6F);
 		if (health <= 0) {
 			health = 0;
 			location.getBlock().setType(Material.BEDROCK);

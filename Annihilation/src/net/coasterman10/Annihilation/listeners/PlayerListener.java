@@ -1,8 +1,5 @@
 package net.coasterman10.Annihilation.listeners;
 
-import java.util.Iterator;
-import java.util.Random;
-
 import net.coasterman10.Annihilation.Annihilation;
 import net.coasterman10.Annihilation.chat.ChatUtil;
 import net.coasterman10.Annihilation.chat.DeathMessageFormatter;
@@ -14,8 +11,6 @@ import net.coasterman10.Annihilation.teams.Team;
 import net.coasterman10.Annihilation.teams.TeamManager;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -24,11 +19,9 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 public class PlayerListener implements Listener {
 	private final Annihilation plugin;
@@ -107,12 +100,6 @@ public class PlayerListener implements Listener {
 		} else
 			e.setDeathMessage(deathMessages.formatDeathMessage(p,
 					e.getDeathMessage()));
-
-		Iterator<ItemStack> iterator = e.getDrops().iterator();
-		while (iterator.hasNext()) {
-			if (isSoulbound(iterator.next()))
-				iterator.remove();
-		}
 		e.setDroppedExp(p.getTotalExperience());
 	}
 
@@ -149,10 +136,13 @@ public class PlayerListener implements Listener {
 				e.setCancelled(true);
 				Player breaker = e.getPlayer();
 				Team attacker = teamManager.getTeamWithPlayer(breaker);
-				if (t == attacker) {
+				if (t == attacker)
 					breaker.sendMessage(ChatColor.AQUA
 							+ "You can't damage your own nexus");
-				} else {
+				else if (plugin.getPhase() == 1)
+					breaker.sendMessage(ChatColor.AQUA
+							+ "Nexuses are invincible in phase 1");
+				else {
 					t.getNexus().damage();
 					plugin.getStatsManager().incrementStat(
 							StatType.NEXUS_DAMAGE, breaker);
@@ -170,20 +160,5 @@ public class PlayerListener implements Listener {
 				}
 			}
 		}
-	}
-
-	@EventHandler
-	public void onDrop(PlayerDropItemEvent e) {
-		if (isSoulbound(e.getItemDrop().getItemStack()))
-			e.getItemDrop().getItemStack().setType(Material.AIR);
-		e.getPlayer().playSound(e.getPlayer().getLocation(), Sound.BLAZE_HIT,
-				1F, 1F + new Random().nextFloat() * 0.25F);
-	}
-
-	private boolean isSoulbound(ItemStack item) {
-		ItemMeta meta = item.getItemMeta();
-		if (meta.hasLore())
-			return meta.getLore().contains(ChatColor.GOLD + "Soulbound");
-		return false;
 	}
 }
