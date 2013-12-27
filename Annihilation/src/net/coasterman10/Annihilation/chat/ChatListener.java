@@ -22,6 +22,7 @@ public class ChatListener implements Listener {
 
 	@EventHandler
 	public void onPlayerChat(final AsyncPlayerChatEvent e) {
+		String DARK_GRAY = ChatColor.DARK_GRAY.toString();
 		String GRAY = ChatColor.GRAY.toString();
 		String WHITE = ChatColor.WHITE.toString();
 
@@ -32,7 +33,7 @@ public class ChatListener implements Listener {
 
 		if (team == null) {
 			String color = ChatColor.DARK_PURPLE.toString();
-			group = GRAY + "[" + color + "Lobby" + GRAY + "]";
+			group = DARK_GRAY + "[" + color + "Lobby" + DARK_GRAY + "]";
 
 			if (message.startsWith("!"))
 				message = message.substring(1);
@@ -40,7 +41,7 @@ public class ChatListener implements Listener {
 			String color = team.getPrefix();
 			if (message.startsWith("!")) {
 				message = message.substring(1);
-				group = GRAY + "[" + color + "All" + GRAY + "]";
+				group = DARK_GRAY + "[" + color + "All" + DARK_GRAY + "]";
 				username = color + username;
 			} else {
 				group = GRAY + "[" + color + "Team" + GRAY + "]";
@@ -51,8 +52,9 @@ public class ChatListener implements Listener {
 
 		e.setFormat(group + " " + WHITE + username + WHITE + ": " + message);
 
-		// HA HA HA HA HA!!!!!
-		if (message.equalsIgnoreCase("NEXUS")) {
+		if (message.contains("NEXUS")) {
+			e.setCancelled(true);
+			
 			plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
 				public void run() {
 					Player player = e.getPlayer();
@@ -60,6 +62,7 @@ public class ChatListener implements Listener {
 							e.getPlayer().getLocation());
 					player.sendMessage(ChatColor.DARK_RED
 							+ "Instead of shouting at your team, why don't you go defend?");
+					
 				}
 			});
 		}
