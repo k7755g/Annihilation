@@ -8,24 +8,24 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 public class AnnihilationCommand implements CommandExecutor {
-    private Annihilation plugin;
+	private Annihilation plugin;
 
-    public AnnihilationCommand(Annihilation plugin) {
-	this.plugin = plugin;
-	plugin.getCommand("annihilation").setExecutor(this);
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label,
-	    String[] args) {
-	if (args.length == 1) {
-	    if (args[0].equalsIgnoreCase("start")) {
-		if (!plugin.startTimer()) {
-		    sender.sendMessage(ChatColor.RED
-			    + "The game has already started");
-		}
-	    }
+	public AnnihilationCommand(Annihilation plugin) {
+		this.plugin = plugin;
+		plugin.getCommand("annihilation").setExecutor(this);
 	}
-	return false;
-    }
+
+	@Override
+	public boolean onCommand(CommandSender sender, Command cmd, String label,
+			String[] args) {
+		if (args.length == 1) {
+			if (args[0].equalsIgnoreCase("start")) {
+				if (!plugin.startTimer()) {
+					sender.sendMessage(ChatColor.RED
+							+ "The game has already started");
+				}
+			}
+		}
+		return false;
+	}
 }

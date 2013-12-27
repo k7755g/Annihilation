@@ -15,10 +15,7 @@ public class TeamManager {
 	public TeamManager(Annihilation plugin) {
 		new TeamCommand(plugin, this);
 		this.plugin = plugin;
-		teams.add(new Team(TeamName.RED));
-		teams.add(new Team(TeamName.YELLOW));
-		teams.add(new Team(TeamName.GREEN));
-		teams.add(new Team(TeamName.BLUE));
+		reset();
 	}
 
 	public boolean areFriendly(Player p1, Player p2) {
@@ -63,5 +60,13 @@ public class TeamManager {
 		if (alive == 1) {
 			plugin.endGame(winner);
 		}
+	}
+
+	public void reset() {
+		teams.clear();
+		teams.add(new Team(TeamName.RED));
+		teams.add(new Team(TeamName.YELLOW));
+		teams.add(new Team(TeamName.GREEN));
+		teams.add(new Team(TeamName.BLUE));
 	}
 }

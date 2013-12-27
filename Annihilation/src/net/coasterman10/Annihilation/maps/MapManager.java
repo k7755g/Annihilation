@@ -83,4 +83,8 @@ public class MapManager {
 		Collections.shuffle(shuffledMaps);
 		return shuffledMaps.subList(0, Math.min(3, shuffledMaps.size()));
 	}
+	
+	public void reset() {
+		currentMap = null;
+	}
 }

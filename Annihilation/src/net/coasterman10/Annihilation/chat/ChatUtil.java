@@ -53,4 +53,9 @@ public class ChatUtil {
 		}
 		broadcast(GRAY + "==============================");
 	}
+
+	public static void winMessage(Team winner) {
+		broadcast(GRAY + "==========[ " + DARK_AQUA + "End Game" + GRAY + " ]==========");
+		broadcast(winner.getFullName() + " wins!");
+	}
 }

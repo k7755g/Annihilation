@@ -37,7 +37,7 @@ public final class Annihilation extends JavaPlugin {
 	private DatabaseHandler db;
 	private KitManager kits;
 	private IngameScoreboardManager ingameScoreboard;
-	public Boolean useMysql = false;
+	public boolean useMysql = false;
 
 	@Override
 	public void onEnable() {
@@ -75,11 +75,12 @@ public final class Annihilation extends JavaPlugin {
 			useMysql = true;
 
 		if (useMysql) {
-			db = new DatabaseHandler(this.getConfig().getString("MySQL.host"),
-					this.getConfig().getInt("MySQL.port"), this.getConfig()
-							.getString("MySQL.name"), this.getConfig()
-							.getString("MySQL.user"), this.getConfig()
-							.getString("MySQL.pass"), this);
+			String host = config.getString("MySQL.host");
+			Integer port = config.getInt("MySQL.port");
+			String name = config.getString("MySQL.name");
+			String user = config.getString("MySQL.user");
+			String pass = config.getString("MySQL.pass");
+			db = new DatabaseHandler(host, port, name, user, pass, this);
 
 			db.query("CREATE TABLE IF NOT EXISTS `annihilation` ( `username` varchar(16) NOT NULL, `kills` int(16) NOT NULL, `deaths` int(16) NOT NULL, `wins` int(16) NOT NULL, `losses` int(16) NOT NULL, `nexus_damage` int(16) NOT NULL, UNIQUE KEY `username` (`username`) ) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
 		} else
@@ -193,6 +194,20 @@ public final class Annihilation extends JavaPlugin {
 	}
 
 	public void endGame(Team winner) {
+		ChatUtil.winMessage(winner);
+		timer.stop();
 
+		long restartDelay = configManager.getConfig("config.yml").getLong(
+				"restart-delay");
+		new RestartTimer(this, restartDelay).start(timer.getTime());
+	}
+
+	public void reset() {
+		teams.reset();
+		maps.reset();
+		for (Player p : getServer().getOnlinePlayers()) {
+			p.getInventory().clear();
+			p.teleport(maps.getLobbySpawnPoint());
+		}
 	}
 }
