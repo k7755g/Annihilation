@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.Set;
 
 import net.coasterman10.Annihilation.Annihilation;
+import net.coasterman10.Annihilation.kits.KitType;
 import net.coasterman10.Annihilation.maps.GameMap;
 
 import org.bukkit.Location;
@@ -92,6 +93,10 @@ public class ResourceListener implements Listener {
 				if (material.equals(Material.MELON_BLOCK)) {
 					qty = 3 + new Random().nextInt(4);
 				}
+				if (material.name().contains("ORE")) {
+					if (plugin.getKitManager().getKit(player) == KitType.MINER)
+						qty *= 2;
+				}
 				player.getInventory().addItem(
 						new ItemStack(resources.get(material).drop, qty));
 			}
@@ -121,21 +126,21 @@ public class ResourceListener implements Listener {
 		Set<Location> diamondLocations = map.getDiamondLocations();
 		if (diamondLocations == null)
 			return;
-		
+
 		for (Location loc : diamondLocations) {
 			loc.getBlock().setType(Material.AIR);
 		}
 	}
-	
+
 	public void spawnDiamonds() {
 		GameMap map = plugin.getMapManager().getCurrentMap();
 		if (map == null)
 			return;
-		
+
 		Set<Location> diamondLocations = map.getDiamondLocations();
 		if (diamondLocations == null)
 			return;
-		
+
 		for (Location loc : diamondLocations) {
 			loc.getBlock().setType(Material.DIAMOND_ORE);
 		}

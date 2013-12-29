@@ -1,7 +1,7 @@
 package net.coasterman10.Annihilation.kits;
 
 public enum KitType {
-	CIVILIAN(new CivilianKit()), WARRIOR(new WarriorKit());
+	CIVILIAN(new CivilianKit()), WARRIOR(new WarriorKit()), MINER(new MinerKit());
 
 	private AbstractKit kit;
 
