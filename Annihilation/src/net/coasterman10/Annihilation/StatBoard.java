@@ -2,6 +2,8 @@ package net.coasterman10.Annihilation;
 
 import java.util.HashMap;
 
+import net.coasterman10.Annihilation.teams.TeamName;
+
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.scoreboard.DisplaySlot;
@@ -52,5 +54,17 @@ public class StatBoard {
 
 	public void removeScore(String name) {
 		board.resetScores(Bukkit.getOfflinePlayer(name));
+	}
+
+	public Scoreboard getScoreboard() {
+		return board;
+	}
+
+	public void registerTeams(TeamName[] values) {
+		for (TeamName t : values) {
+			board.registerNewTeam(t.name());
+			board.getTeam(t.name()).setAllowFriendlyFire(false);
+			board.getTeam(t.name()).setPrefix(t.prefix());
+		}
 	}
 }

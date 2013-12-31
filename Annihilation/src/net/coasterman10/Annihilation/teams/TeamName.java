@@ -8,7 +8,10 @@ public enum TeamName {
 
 	@Override
 	public String toString() {
-		return ChatColor.valueOf(name())
-				+ WordUtils.capitalize(name().toLowerCase());
+		return prefix() + WordUtils.capitalize(name().toLowerCase());
+	}
+
+	public String prefix() {
+		return ChatColor.valueOf(name()).toString();
 	}
 }

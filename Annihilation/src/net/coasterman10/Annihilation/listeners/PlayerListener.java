@@ -1,6 +1,7 @@
 package net.coasterman10.Annihilation.listeners;
 
 import net.coasterman10.Annihilation.Annihilation;
+import net.coasterman10.Annihilation.bar.BarUtil;
 import net.coasterman10.Annihilation.chat.ChatUtil;
 import net.coasterman10.Annihilation.chat.DeathMessageFormatter;
 import net.coasterman10.Annihilation.kits.KitManager;
@@ -9,16 +10,22 @@ import net.coasterman10.Annihilation.maps.MapManager;
 import net.coasterman10.Annihilation.stats.StatType;
 import net.coasterman10.Annihilation.teams.Team;
 import net.coasterman10.Annihilation.teams.TeamManager;
+import net.coasterman10.EnderToolsAPI.EnderToolsAPI;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
@@ -37,6 +44,30 @@ public class PlayerListener implements Listener {
 		teamManager = plugin.getTeamManager();
 		kitManager = plugin.getKitManager();
 		deathMessages = new DeathMessageFormatter(teamManager);
+	}
+
+	@EventHandler
+	public void onInteract(PlayerInteractEvent e) {
+		if (Bukkit.getPluginManager().getPlugin("EnderToolsAPI") == null)
+			return;
+		
+		if (e.getAction() != Action.RIGHT_CLICK_BLOCK)
+			return;
+		Block b = e.getClickedBlock();
+		
+		boolean shouldCancel = true;
+		
+		if (b.getType() == Material.WORKBENCH)
+			EnderToolsAPI.openWorkbench(e.getPlayer());
+		else if (b.getType() == Material.FURNACE)
+			EnderToolsAPI.openFurnace(e.getPlayer());
+		else if (b.getType() == Material.BREWING_STAND)
+			EnderToolsAPI.openBrewingStand(e.getPlayer());
+		else
+			shouldCancel = false;
+		
+		if (shouldCancel)
+			e.setCancelled(true);
 	}
 
 	@EventHandler
@@ -76,9 +107,11 @@ public class PlayerListener implements Listener {
 							+ "', '0', '0', '0', '0', '0');");
 		}
 
-		if (plugin.getPhase() == 0)
+		if (plugin.getPhase() == 0) {
 			plugin.getVotingManager().setCurrentForPlayers(player);
-		else
+			BarUtil.setMessageAndPercent(player, ChatColor.DARK_AQUA
+					+ "Welcome to Annihilation!", 0.01F);
+		} else
 			plugin.getIngameScoreboardmanager().setCurrentForPlayers(player);
 	}
 
@@ -132,7 +165,8 @@ public class PlayerListener implements Listener {
 		if (plugin.isEmptyColumn(e.getBlock().getLocation()))
 			e.setCancelled(true);
 		for (Team t : plugin.getTeamManager().getTeams()) {
-			if (t.getNexus().getLocation().equals(e.getBlock().getLocation())) {
+			if (t.getNexus().getLocation().equals(e.getBlock().getLocation())
+					&& e.getBlock().getType() != Material.BEDROCK) {
 				e.setCancelled(true);
 				Player breaker = e.getPlayer();
 				Team attacker = teamManager.getTeamWithPlayer(breaker);
@@ -152,10 +186,11 @@ public class PlayerListener implements Listener {
 					plugin.getIngameScoreboardmanager().updateScore(t);
 					if (t.getNexus().getHealth() == 0) {
 						ChatUtil.nexusDestroyed(attacker, t);
-					}
-					for (Player p : t.getPlayers()) {
-						plugin.getStatsManager().incrementStat(StatType.LOSSES,
-								p);
+						teamManager.checkWin();
+						for (Player p : t.getPlayers()) {
+							plugin.getStatsManager().incrementStat(
+									StatType.LOSSES, p);
+						}
 					}
 				}
 			}

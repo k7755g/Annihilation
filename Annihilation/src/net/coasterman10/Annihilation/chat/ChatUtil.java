@@ -49,7 +49,7 @@ public class ChatUtil {
 		case 4:
 			break;
 		case 5:
-			broadcast(RED + "2x nexus damage");
+			broadcast(RED + "Double nexus damage");
 		}
 		broadcast(GRAY + "==============================");
 	}
@@ -57,5 +57,6 @@ public class ChatUtil {
 	public static void winMessage(Team winner) {
 		broadcast(GRAY + "==========[ " + DARK_AQUA + "End Game" + GRAY + " ]==========");
 		broadcast(winner.getFullName() + " wins!");
+		broadcast(GRAY + "==============================");
 	}
 }

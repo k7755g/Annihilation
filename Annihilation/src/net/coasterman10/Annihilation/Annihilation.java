@@ -2,6 +2,7 @@ package net.coasterman10.Annihilation;
 
 import java.util.logging.Level;
 
+import net.coasterman10.Annihilation.bar.BarUtil;
 import net.coasterman10.Annihilation.chat.ChatListener;
 import net.coasterman10.Annihilation.chat.ChatUtil;
 import net.coasterman10.Annihilation.commands.AnnihilationCommand;
@@ -14,6 +15,7 @@ import net.coasterman10.Annihilation.listeners.WorldListener;
 import net.coasterman10.Annihilation.maps.MapManager;
 import net.coasterman10.Annihilation.maps.VotingManager;
 import net.coasterman10.Annihilation.stats.DatabaseHandler;
+import net.coasterman10.Annihilation.stats.StatType;
 import net.coasterman10.Annihilation.stats.StatsManager;
 import net.coasterman10.Annihilation.teams.Team;
 import net.coasterman10.Annihilation.teams.TeamManager;
@@ -68,6 +70,8 @@ public final class Annihilation extends JavaPlugin {
 		new WorldListener(this);
 		new SoulboundListener(this);
 		new WandListener(this);
+		
+		BarUtil.init(this);
 
 		voting.setCurrentForPlayers(getServer().getOnlinePlayers());
 
@@ -85,6 +89,8 @@ public final class Annihilation extends JavaPlugin {
 			db.query("CREATE TABLE IF NOT EXISTS `annihilation` ( `username` varchar(16) NOT NULL, `kills` int(16) NOT NULL, `deaths` int(16) NOT NULL, `wins` int(16) NOT NULL, `losses` int(16) NOT NULL, `nexus_damage` int(16) NOT NULL, UNIQUE KEY `username` (`username`) ) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
 		} else
 			db = new DatabaseHandler(this);
+		
+		reset();
 	}
 
 	public boolean startTimer() {
@@ -106,7 +112,7 @@ public final class Annihilation extends JavaPlugin {
 				ingameScoreboard.setCurrentForPlayers(p);
 			}
 
-			t.loadNexus(maps.getNexus(t.getName()), 75);
+			t.loadNexus(maps.getNexus(t.getName()), 25);
 			ingameScoreboard.updateScore(t);
 		}
 
@@ -197,6 +203,8 @@ public final class Annihilation extends JavaPlugin {
 		ChatUtil.winMessage(winner);
 		timer.stop();
 
+		for (Player p : winner.getPlayers())
+			stats.incrementStat(StatType.WINS, p);
 		long restartDelay = configManager.getConfig("config.yml").getLong(
 				"restart-delay");
 		new RestartTimer(this, restartDelay).start(timer.getTime());
@@ -205,9 +213,11 @@ public final class Annihilation extends JavaPlugin {
 	public void reset() {
 		teams.reset();
 		maps.reset();
+		timer.reset();
 		for (Player p : getServer().getOnlinePlayers()) {
 			p.getInventory().clear();
 			p.teleport(maps.getLobbySpawnPoint());
+			BarUtil.setMessageAndPercent(p, ChatColor.DARK_AQUA + "Welcome to Annihilation!", 0.01F);
 		}
 	}
 }

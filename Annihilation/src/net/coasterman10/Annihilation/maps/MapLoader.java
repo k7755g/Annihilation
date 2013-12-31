@@ -8,6 +8,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.logging.Logger;
 
+import org.bukkit.Bukkit;
+
 public class MapLoader {
 	private final Logger log;
 	private final File dataFolder;
@@ -24,9 +26,11 @@ public class MapLoader {
 		File source = new File(mapsFolder, name);
 		if (!source.exists())
 			return false;
+		
+		Bukkit.unloadWorld(name, false);
 
 		File destination = new File(dataFolder.getParentFile().getParentFile(),
-				name);
+				name + File.separator + "region");
 		try {
 			copyFolder(source, destination);
 			return true;

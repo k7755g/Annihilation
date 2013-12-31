@@ -6,7 +6,8 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitScheduler;
 
-import net.coasterman10.Annihilation.bar.BarManager;
+import net.coasterman10.Annihilation.bar.BarUtil;
+import net.coasterman10.Annihilation.chat.ChatUtil;
 
 public class PhaseTimer {
 	private long time;
@@ -16,13 +17,11 @@ public class PhaseTimer {
 	private boolean isRunning;
 
 	private final Annihilation plugin;
-	private final BarManager bar;
-	
+
 	private int taskID;
 
 	public PhaseTimer(Annihilation plugin, long start, long period) {
 		this.plugin = plugin;
-		bar = new BarManager(plugin);
 		startTime = start;
 		phaseTime = period;
 		phase = 0;
@@ -30,7 +29,6 @@ public class PhaseTimer {
 
 	public PhaseTimer(Annihilation plugin, ConfigurationSection config) {
 		this.plugin = plugin;
-		bar = new BarManager(plugin);
 		startTime = config.getLong("start-delay", 120L);
 		phaseTime = config.getLong("phase-period", 600L);
 		phase = 0;
@@ -39,26 +37,33 @@ public class PhaseTimer {
 	public void start() {
 		if (!isRunning) {
 			BukkitScheduler scheduler = plugin.getServer().getScheduler();
-			taskID = scheduler.scheduleSyncRepeatingTask(plugin, new Runnable() {
-				public void run() {
-					onSecond();
-				}
-			}, 20L, 20L);
+			taskID = scheduler.scheduleSyncRepeatingTask(plugin,
+					new Runnable() {
+						public void run() {
+							onSecond();
+						}
+					}, 20L, 20L);
 			isRunning = true;
 		}
 
 		time = -startTime;
 
 		for (Player p : Bukkit.getOnlinePlayers())
-			bar.setMessageAndPercent(p, ChatColor.GREEN + "Starting in "
+			BarUtil.setMessageAndPercent(p, ChatColor.GREEN + "Starting in "
 					+ -time, 1F);
 	}
-	
+
 	public void stop() {
 		if (isRunning) {
 			isRunning = false;
 			Bukkit.getServer().getScheduler().cancelTask(taskID);
 		}
+	}
+
+	public void reset() {
+		stop();
+		time = -startTime;
+		phase = 0;
 	}
 
 	public long getTime() {
@@ -86,8 +91,10 @@ public class PhaseTimer {
 	private void onSecond() {
 		time++;
 
-		if (getRemainingPhaseTime() == 0)
+		if (getRemainingPhaseTime() == 0) {
 			phase++;
+			ChatUtil.phaseMessage(phase);
+		}
 
 		float percent;
 		String text;
@@ -100,31 +107,31 @@ public class PhaseTimer {
 				percent = 1F;
 			else
 				percent = (float) getRemainingPhaseTime() / (float) phaseTime;
-			text = "Phase " + phase;
-			switch (phase) {
-			case 1:
-				text = ChatColor.BLUE + text;
-				break;
-			case 2:
-				text = ChatColor.GREEN + text;
-				break;
-			case 3:
-				text = ChatColor.YELLOW + text;
-				break;
-			case 4:
-				text = ChatColor.GOLD + text;
-				break;
-			case 5:
-				text = ChatColor.RED + text;
-				break;
-			}
-			text += ChatColor.WHITE + " | " + timeString(time);
+			text = getPhaseColor() + "Phase " + phase + ChatColor.WHITE + " | "
+					+ timeString(time);
 		}
 
 		for (Player p : Bukkit.getOnlinePlayers())
-			bar.setMessageAndPercent(p, text, percent);
+			BarUtil.setMessageAndPercent(p, text, percent);
 
 		plugin.onSecond();
+	}
+
+	private String getPhaseColor() {
+		switch (phase) {
+		case 1:
+			return ChatColor.BLUE.toString();
+		case 2:
+			return ChatColor.GREEN.toString();
+		case 3:
+			return ChatColor.YELLOW.toString();
+		case 4:
+			return ChatColor.GOLD.toString();
+		case 5:
+			return ChatColor.RED.toString();
+		default:
+			return ChatColor.WHITE.toString();
+		}
 	}
 
 	public static String timeString(long time) {

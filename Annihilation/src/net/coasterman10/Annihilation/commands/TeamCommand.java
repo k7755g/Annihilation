@@ -63,7 +63,13 @@ public class TeamCommand implements CommandExecutor {
 					target.getName()));
 			plugin.getKitManager().getKit(player).getKitClass()
 					.give(player, target.getName());
+			plugin.getIngameScoreboardmanager().setCurrentForPlayers(player);
 		}
+
+		plugin.getVotingManager().getScoreboard()
+				.getTeam(target.getName().name()).addPlayer(player);
+		plugin.getIngameScoreboardmanager().getScoreboard()
+				.getTeam(target.getName().name()).addPlayer(player);
 	}
 
 	private void listTeams(CommandSender sender) {

@@ -1,9 +1,11 @@
 package net.coasterman10.Annihilation;
 
 import org.bukkit.entity.Player;
+import org.bukkit.scoreboard.Scoreboard;
 
 import net.coasterman10.Annihilation.teams.Team;
 import net.coasterman10.Annihilation.teams.TeamManager;
+import net.coasterman10.Annihilation.teams.TeamName;
 
 public class IngameScoreboardManager {
 	private final TeamManager teamManager;
@@ -17,6 +19,8 @@ public class IngameScoreboardManager {
 			updateScore(t);
 		}
 		nexusBoard.show();
+		
+		nexusBoard.registerTeams(TeamName.values());
 	}
 
 	public void setTitle(String title) {
@@ -34,5 +38,9 @@ public class IngameScoreboardManager {
 			if (team.getNexus().getHealth() == 0)
 				nexusBoard.removeScore(team.getName() + " Nexus");
 		}
+	}
+
+	public Scoreboard getScoreboard() {
+		return nexusBoard.getScoreboard();
 	}
 }

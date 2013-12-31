@@ -7,13 +7,14 @@ import java.util.Set;
 import net.coasterman10.Annihilation.Annihilation;
 import net.coasterman10.Annihilation.StatBoard;
 import net.coasterman10.Annihilation.commands.VoteCommand;
+import net.coasterman10.Annihilation.teams.TeamName;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
+import org.bukkit.scoreboard.Scoreboard;
 
-public class VotingManager implements Listener {
+public class VotingManager {
 	private final StatBoard statBoard;
 	private final HashSet<String> maps = new HashSet<String>();
 	private final HashMap<String, String> votes = new HashMap<String, String>();
@@ -31,6 +32,12 @@ public class VotingManager implements Listener {
 		}
 		
 		statBoard.show();
+		
+		statBoard.registerTeams(TeamName.values());
+	}
+	
+	public Scoreboard getScoreboard() {
+		return statBoard.getScoreboard();
 	}
 
 	public void setCurrentForPlayers(Player... players) {
