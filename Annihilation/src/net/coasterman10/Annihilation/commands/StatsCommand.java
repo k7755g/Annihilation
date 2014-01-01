@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.coasterman10.Annihilation.Annihilation;
 import net.coasterman10.Annihilation.stats.StatType;
 import net.coasterman10.Annihilation.stats.StatsManager;
 
@@ -17,13 +16,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class StatsCommand implements CommandExecutor {
-	private Annihilation plugin;
 	private StatsManager manager;
 
-	public StatsCommand(Annihilation instance, StatsManager manager) {
-		this.plugin = instance;
+	public StatsCommand(StatsManager manager) {
 		this.manager = manager;
-		plugin.getCommand("stats").setExecutor(this);
 	}
 
 	@Override
@@ -72,7 +68,8 @@ public class StatsCommand implements CommandExecutor {
 		for (StatType stat : stats) {
 			if (stat == null)
 				continue;
-			String name = WordUtils.capitalize(stat.name().toLowerCase().replace('_', ' '));
+			String name = WordUtils.capitalize(stat.name().toLowerCase()
+					.replace('_', ' '));
 
 			player.sendMessage(DARK_AQUA + name + ": " + AQUA
 					+ manager.getStat(stat, player));

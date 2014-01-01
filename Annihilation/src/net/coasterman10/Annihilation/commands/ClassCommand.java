@@ -1,8 +1,7 @@
 package net.coasterman10.Annihilation.commands;
 
-import net.coasterman10.Annihilation.Annihilation;
-import net.coasterman10.Annihilation.kits.KitManager;
-import net.coasterman10.Annihilation.kits.KitType;
+import net.coasterman10.Annihilation.Kit;
+import net.coasterman10.Annihilation.PlayerMeta;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -11,13 +10,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class ClassCommand implements CommandExecutor {
-	private final KitManager kitManager;
-
-	public ClassCommand(Annihilation plugin, KitManager kitManager) {
-		this.kitManager = kitManager;
-		plugin.getCommand("class").setExecutor(this);
-	}
-
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label,
 			String[] args) {
@@ -25,21 +17,22 @@ public class ClassCommand implements CommandExecutor {
 			sender.sendMessage(ChatColor.RED
 					+ "Classes pertain only to players");
 		} else {
+			Player player = (Player) sender;
 			if (args.length == 0) {
-				listKits((Player) sender);
+				listKits(player);
 			} else {
-				KitType kit = KitType.getKitType(args[0]);
-				if (kit == kitManager.getKit((Player) sender)) {
-					sender.sendMessage(ChatColor.DARK_AQUA
-							+ "You are already a "
-							+ kit.getKitClass().getName());
+				Kit kit = Kit.getKit(args[0]);
+				PlayerMeta meta = PlayerMeta.getMeta(player);
+				if (meta.getKit() == kit) {
+					player.sendMessage(ChatColor.DARK_AQUA
+							+ "You are already a " + kit.getName());
 				} else if (kit != null) {
-					kitManager.setKit((Player) sender, kit);
-					((Player) sender).setHealth(0.0);
+					meta.setKit(kit);
+					player.setHealth(0.0);
 				} else {
-					sender.sendMessage("\"" + args[0]
+					player.sendMessage("\"" + args[0]
 							+ "\" is not a valid class.");
-					listKits((Player) sender);
+					listKits(player);
 				}
 			}
 		}
@@ -51,17 +44,16 @@ public class ClassCommand implements CommandExecutor {
 		String DARK_AQUA = ChatColor.DARK_AQUA.toString();
 		player.sendMessage(GRAY + "==========[ " + DARK_AQUA + "Classes" + GRAY
 				+ " ]==========");
-		for (KitType kit : KitType.values()) {
+		for (Kit kit : Kit.values()) {
 			String color;
-			if (kitManager.hasKit(player, kit))
+			if (kit.isOwnedBy(player))
 				color = ChatColor.GREEN.toString();
 			else
 				color = ChatColor.RED.toString();
-			if (kitManager.getKit(player) == kit)
-				player.sendMessage(color + kit.getKitClass().getName() + GRAY
-						+ " - Selected");
+			if (PlayerMeta.getMeta(player).getKit() == kit)
+				player.sendMessage(color + kit.getName() + GRAY + " - Selected");
 			else
-				player.sendMessage(color + kit.getKitClass().getName());
+				player.sendMessage(color + kit.getName());
 		}
 		player.sendMessage(GRAY + "=========================");
 	}

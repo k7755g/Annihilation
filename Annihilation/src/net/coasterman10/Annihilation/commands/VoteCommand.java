@@ -17,7 +17,9 @@ public class VoteCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label,
 			String[] args) {
-		if (args.length == 0)
+		if (!manager.isRunning())
+			sender.sendMessage(ChatColor.RED + "Map voting has been closed.");
+		else if (args.length == 0)
 			listMaps(sender);
 		else if (!manager.vote(sender, args[0]))
 			listMaps(sender);

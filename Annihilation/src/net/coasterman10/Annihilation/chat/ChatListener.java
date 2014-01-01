@@ -1,8 +1,8 @@
 package net.coasterman10.Annihilation.chat;
 
 import net.coasterman10.Annihilation.Annihilation;
-import net.coasterman10.Annihilation.teams.Team;
-import net.coasterman10.Annihilation.teams.TeamManager;
+import net.coasterman10.Annihilation.AnnihilationTeam;
+import net.coasterman10.Annihilation.PlayerMeta;
 
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -11,13 +11,11 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
 public class ChatListener implements Listener {
-	private final TeamManager teamManager;
 	private final Annihilation plugin;
 
 	public ChatListener(Annihilation plugin) {
 		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 		this.plugin = plugin;
-		teamManager = plugin.getTeamManager();
 	}
 
 	@EventHandler
@@ -27,7 +25,7 @@ public class ChatListener implements Listener {
 		String WHITE = ChatColor.WHITE.toString();
 
 		String username = e.getPlayer().getName();
-		Team team = teamManager.getTeamWithPlayer(e.getPlayer());
+		AnnihilationTeam team = PlayerMeta.getMeta(e.getPlayer()).getTeam();
 		String group;
 		String message = e.getMessage();
 
@@ -38,7 +36,7 @@ public class ChatListener implements Listener {
 			if (message.startsWith("!"))
 				message = message.substring(1);
 		} else {
-			String color = team.getPrefix();
+			String color = team.color().toString();
 			if (message.startsWith("!")) {
 				message = message.substring(1);
 				group = DARK_GRAY + "[" + color + "All" + DARK_GRAY + "]";

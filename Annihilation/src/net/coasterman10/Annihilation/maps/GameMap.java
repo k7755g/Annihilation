@@ -1,15 +1,12 @@
 package net.coasterman10.Annihilation.maps;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import net.coasterman10.Annihilation.AnnihilationTeam;
 import net.coasterman10.Annihilation.maps.MapLoader;
-import net.coasterman10.Annihilation.teams.TeamName;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -19,15 +16,11 @@ import org.bukkit.configuration.ConfigurationSection;
 
 public class GameMap {
 	private World world;
-	private Map<TeamName, List<Location>> spawns;
-	private Map<TeamName, Location> nexuses;
 	private Set<Location> diamonds;
 	private MapLoader mapLoader;
 	private ConfigurationSection config;
 
 	public GameMap(MapLoader mapLoader, ConfigurationSection config) {
-		spawns = new EnumMap<TeamName, List<Location>>(TeamName.class);
-		nexuses = new EnumMap<TeamName, Location>(TeamName.class);
 		this.mapLoader = mapLoader;
 		this.config = config;
 	}
@@ -44,10 +37,6 @@ public class GameMap {
 
 		if (!loadConfig())
 			return false;
-
-		for (TeamName name : TeamName.values())
-			if (!spawns.containsKey(name) || !nexuses.containsKey(name))
-				return false;
 
 		return true;
 	}
@@ -82,8 +71,9 @@ public class GameMap {
 			}
 			if (spawnLocations.isEmpty())
 				return false;
-			if (TeamName.valueOf(key.toUpperCase()) != null)
-				spawns.put(TeamName.valueOf(key.toUpperCase()), spawnLocations);
+			if (AnnihilationTeam.valueOf(key.toUpperCase()) != null)
+				for (Location loc : spawnLocations)
+					AnnihilationTeam.valueOf(key.toUpperCase()).addSpawn(loc);
 		}
 		return true;
 	}
@@ -98,8 +88,8 @@ public class GameMap {
 			if (nexusConfig.contains(key)) {
 				Location loc = parseLocation(nexusConfig.getString(key));
 				if (loc != null)
-					if (TeamName.valueOf(key.toUpperCase()) != null)
-						nexuses.put(TeamName.valueOf(key.toUpperCase()), loc);
+					if (AnnihilationTeam.valueOf(key.toUpperCase()) != null)
+						AnnihilationTeam.valueOf(key.toUpperCase()).loadNexus(loc, 75);
 					else
 						return false;
 			} else
@@ -117,16 +107,6 @@ public class GameMap {
 			if (loc != null)
 				diamonds.add(loc);
 		}
-	}
-
-	public Location getSpawnPoint(TeamName teamName) {
-		List<Location> spawnList = new ArrayList<Location>(spawns.get(teamName));
-		Collections.shuffle(spawnList);
-		return spawnList.get(0);
-	}
-
-	public Location getNexusLocation(TeamName team) {
-		return nexuses.get(team);
 	}
 
 	public String getName() {

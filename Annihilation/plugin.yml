@@ -19,3 +19,4 @@ commands:
     description: Lists your stats
   class:
     description: Selects your kit
+softdepend: [EnderToolsAPI]

@@ -4,25 +4,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import net.coasterman10.Annihilation.Annihilation;
-import net.coasterman10.Annihilation.commands.StatsCommand;
+import net.coasterman10.Annihilation.ConfigManager;
 
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 
 public class StatsManager {
 	private Annihilation plugin;
-	private YamlConfiguration yml;
+	private ConfigManager config;
 	public static final int UNDEF_STAT = -42;
 
-	public StatsManager(Annihilation instance) {
+	public StatsManager(Annihilation instance, ConfigManager config) {
 		this.plugin = instance;
-		new StatsCommand(instance, this);
-		yml = plugin.getConfigManager().getConfig("stats.yml");
 	}
 
 	public int getStat(StatType s, Player p) {
 		if (!plugin.useMysql) {
-			return yml.getInt(p.getName() + "." + s.name());
+			return config.getConfig("stats.yml").getInt(
+					p.getName() + "." + s.name());
 		} else {
 			try {
 				int stat = UNDEF_STAT;
@@ -44,8 +42,9 @@ public class StatsManager {
 
 	public void setValue(StatType s, Player p, int value) {
 		if (!plugin.useMysql) {
-			yml.set(p.getName() + "." + s.name(), value);
-			plugin.getConfigManager().save("stats.yml");
+			config.getConfig("stats.yml").set(p.getName() + "." + s.name(),
+					value);
+			config.save("stats.yml");
 		} else {
 			plugin.getDatabaseHandler().query(
 					"UPDATE `annihilation` SET `" + s.name().toLowerCase()

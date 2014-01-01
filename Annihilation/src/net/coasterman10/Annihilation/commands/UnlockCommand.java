@@ -10,22 +10,22 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 public class UnlockCommand implements CommandExecutor {
-    private final ChestLocker cl;
+	private final ChestLocker cl;
 
-    public UnlockCommand(ChestLocker cl) {
-	this.cl = cl;
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label,
-	    String[] args) {
-	if (sender instanceof Player) {
-	    Block chest = cl.getChest(sender.getName());
-	    cl.unlockChest(chest, (Player) sender);
-	} else {
-	    sender.sendMessage(ChatColor.GOLD
-		    + "Only players can unlock chests.");
+	public UnlockCommand(ChestLocker cl) {
+		this.cl = cl;
 	}
-	return true;
-    }
+
+	@Override
+	public boolean onCommand(CommandSender sender, Command cmd, String label,
+			String[] args) {
+		if (sender instanceof Player) {
+			Block chest = cl.getChest(sender.getName());
+			cl.unlockChest(chest, (Player) sender);
+		} else {
+			sender.sendMessage(ChatColor.GOLD
+					+ "Only players can unlock chests.");
+		}
+		return true;
+	}
 }

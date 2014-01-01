@@ -4,7 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
-import net.coasterman10.Annihilation.teams.Team;
+import net.coasterman10.Annihilation.AnnihilationTeam;
+import net.coasterman10.Annihilation.PlayerMeta;
 
 public class ChatUtil {
 	private static final String DARK_AQUA = ChatColor.DARK_AQUA.toString();
@@ -15,29 +16,31 @@ public class ChatUtil {
 		Bukkit.broadcastMessage(message);
 	}
 
-	public static void nexusDestroyed(Team attacker, Team victim) {
+	public static void nexusDestroyed(AnnihilationTeam attacker,
+			AnnihilationTeam victim) {
 		broadcast(GRAY + "===============[ " + DARK_AQUA + "Nexus Destroyed"
 				+ GRAY + " ]===============");
-		broadcast(victim.getFullName() + "'s" + GRAY
-				+ " nexus has been destroyed by " + attacker.getFullName());
+		broadcast(victim.coloredName() + "'s" + GRAY
+				+ " nexus has been destroyed by " + attacker.coloredName());
 		broadcast(GRAY + "===============================================");
 	}
 
-	public static String nexusBreakMessage(Player breaker, Team attacker,
-			Team victim) {
+	public static String nexusBreakMessage(Player breaker,
+			AnnihilationTeam attacker, AnnihilationTeam victim) {
 		return colorizeName(breaker, attacker) + GRAY + " has damaged the "
-				+ victim.getName() + " team's nexus!";
+				+ victim.coloredName() + " team's nexus!";
 	}
 
-	private static String colorizeName(Player player, Team team) {
-		return team.getPrefix() + player.getName();
+	private static String colorizeName(Player player, AnnihilationTeam team) {
+		return team.color() + player.getName();
 	}
 
 	public static void phaseMessage(int phase) {
-		broadcast(GRAY + "==========[ " + DARK_AQUA + "Progress" + GRAY + " ]==========");
+		broadcast(GRAY + "==========[ " + DARK_AQUA + "Progress" + GRAY
+				+ " ]==========");
 		broadcast(GRAY + "Phase " + phase + " has started");
 		switch (phase) {
-		case 1: 
+		case 1:
 			broadcast(GRAY + "Each nexus is invincible for 10 minutes");
 			break;
 		case 2:
@@ -54,9 +57,35 @@ public class ChatUtil {
 		broadcast(GRAY + "==============================");
 	}
 
-	public static void winMessage(Team winner) {
-		broadcast(GRAY + "==========[ " + DARK_AQUA + "End Game" + GRAY + " ]==========");
-		broadcast(winner.getFullName() + " wins!");
+	public static void winMessage(AnnihilationTeam winner) {
+		broadcast(GRAY + "==========[ " + DARK_AQUA + "End Game" + GRAY
+				+ " ]==========");
+		broadcast(winner.coloredName() + " wins!");
 		broadcast(GRAY + "==============================");
+	}
+
+	public static String formatDeathMessage(Player victim, Player killer,
+			String original) {
+		AnnihilationTeam killerTeam = PlayerMeta.getMeta(killer).getTeam();
+		String killerColor = killerTeam != null ? killerTeam.color().toString()
+				: ChatColor.DARK_PURPLE.toString();
+		String killerName = killerColor + killer.getName() + ChatColor.GRAY;
+
+		String message = ChatColor.GRAY + formatDeathMessage(victim, original);
+		message = message.replace(killer.getName(), killerName);
+
+		return message;
+	}
+
+	public static String formatDeathMessage(Player victim, String original) {
+		AnnihilationTeam victimTeam = PlayerMeta.getMeta(victim).getTeam();
+		String victimColor = victimTeam != null ? victimTeam.color()
+				.toString() : ChatColor.DARK_PURPLE.toString();
+		String victimName = victimColor + victim.getName() + ChatColor.GRAY;
+
+		String message = ChatColor.GRAY + original;
+		message = message.replace(victim.getName(), victimName);
+
+		return message;
 	}
 }

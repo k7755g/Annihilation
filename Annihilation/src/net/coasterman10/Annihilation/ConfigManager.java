@@ -1,8 +1,10 @@
 package net.coasterman10.Annihilation;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.TreeMap;
 
 import net.coasterman10.Annihilation.Annihilation;
@@ -57,11 +59,20 @@ public class ConfigManager {
 			try {
 				if (!configFile.exists()) {
 					configFile.createNewFile();
-					InputStream stream = plugin.getResource(filename);
-					if (stream != null) {
-						YamlConfiguration temp = YamlConfiguration
-								.loadConfiguration(stream);
-						temp.save(configFile);
+					InputStream in = plugin.getResource(filename);
+					if (in != null) {
+						try {
+							OutputStream out = new FileOutputStream(configFile);
+							byte[] buf = new byte[1024];
+							int len;
+							while ((len = in.read(buf)) > 0) {
+								out.write(buf, 0, len);
+							}
+							out.close();
+							in.close();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
 					} else {
 						plugin.getLogger().warning(
 								"Default configuration for " + filename

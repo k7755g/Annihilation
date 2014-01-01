@@ -4,10 +4,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map.Entry;
 
-import net.coasterman10.Annihilation.commands.UnlockCommand;
-import net.coasterman10.Annihilation.teams.TeamManager;
-
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -21,7 +17,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 
 public class ChestLocker implements Listener {
-	private final TeamManager teamManager;
 	private final HashMap<Block, String> chests = new HashMap<Block, String>();
 	private final static HashSet<BlockFace> faces = new HashSet<BlockFace>();
 
@@ -32,30 +27,24 @@ public class ChestLocker implements Listener {
 		faces.add(BlockFace.WEST);
 	};
 
-	public ChestLocker(Annihilation plugin) {
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
-		plugin.getCommand("unlock").setExecutor(new UnlockCommand(this));
-		teamManager = plugin.getTeamManager();
-	};
-
 	@EventHandler(ignoreCancelled = true)
 	public void onBlockBreak(BlockBreakEvent e) {
 		Block block = e.getBlock();
 		Player player = e.getPlayer();
 		if (chests.containsKey(block)) {
 			String owner = chests.get(block);
-			if (!teamManager.areFriendly(Bukkit.getPlayer(owner), player))
-				return;
-			if (owner != player.getName()) {
-				e.setCancelled(true);
-				player.sendMessage(ChatColor.GOLD
-						+ "You can't break this chest, it is locked by "
-						+ owner + ".");
-			} else {
-				chests.remove(block);
-				player.sendMessage(ChatColor.GOLD
-						+ "You have broken your locked chest, you may now lock another chest.");
-			}
+			if (PlayerMeta.getMeta(player).getTeam() != PlayerMeta.getMeta(
+					owner).getTeam())
+				if (owner != player.getName()) {
+					e.setCancelled(true);
+					player.sendMessage(ChatColor.GOLD
+							+ "You can't break this chest, it is locked by "
+							+ owner + ".");
+				} else {
+					chests.remove(block);
+					player.sendMessage(ChatColor.GOLD
+							+ "You have broken your locked chest, you may now lock another chest.");
+				}
 		}
 	}
 
@@ -67,8 +56,8 @@ public class ChestLocker implements Listener {
 
 		if (chests.containsKey(below)) {
 			if (chests.get(below) != player.getName()
-					&& !teamManager.areFriendly(
-							Bukkit.getPlayer(chests.get(below)), player)) {
+					&& PlayerMeta.getMeta(player).getTeam() == PlayerMeta
+							.getMeta(chests.get(below)).getTeam()) {
 				e.setCancelled(true);
 				String owner = chests.get(below);
 				player.sendMessage(ChatColor.GOLD + "You can't block " + owner
@@ -100,7 +89,8 @@ public class ChestLocker implements Listener {
 			Block chest = (Block) e.getInventory().getHolder();
 			Player player = (Player) e.getPlayer();
 			String owner = chests.get(chest);
-			if (!teamManager.areFriendly(Bukkit.getPlayer(owner), player))
+			if (PlayerMeta.getMeta(owner).getTeam() != PlayerMeta.getMeta(
+					player).getTeam())
 				return;
 			if (owner != player.getName()) {
 				e.setCancelled(true);

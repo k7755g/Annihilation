@@ -5,50 +5,31 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.coasterman10.Annihilation.Annihilation;
-import net.coasterman10.Annihilation.StatBoard;
-import net.coasterman10.Annihilation.commands.VoteCommand;
-import net.coasterman10.Annihilation.teams.TeamName;
+import net.coasterman10.Annihilation.ScoreboardUtil;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import org.bukkit.scoreboard.Scoreboard;
 
 public class VotingManager {
-	private final StatBoard statBoard;
 	private final HashSet<String> maps = new HashSet<String>();
 	private final HashMap<String, String> votes = new HashMap<String, String>();
-
+	private boolean running = true;
+	
 	public VotingManager(Annihilation plugin) {
-		plugin.getCommand("vote").setExecutor(new VoteCommand(this));
-
 		String title = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Voting";
-		statBoard = new StatBoard(plugin.getServer().getScoreboardManager());
-		statBoard.setTitle(title);
+		ScoreboardUtil.setTitle(title);
 
 		for (String map : plugin.getMapManager().getRandomMaps()) {
 			maps.add(map);
-			statBoard.setScore(map, 0);
+			ScoreboardUtil.setScore(map, 0);
 		}
-		
-		statBoard.show();
-		
-		statBoard.registerTeams(TeamName.values());
-	}
-	
-	public Scoreboard getScoreboard() {
-		return statBoard.getScoreboard();
-	}
-
-	public void setCurrentForPlayers(Player... players) {
-		statBoard.showForPlayers(players);
 	}
 
 	public boolean vote(CommandSender voter, String vote) {
 		for (String map : maps) {
 			if (vote.equalsIgnoreCase(map)) {
 				votes.put(voter.getName(), map);
-				statBoard.setScore(map, countVotes(map));
+				ScoreboardUtil.setScore(map, countVotes(map));
 				voter.sendMessage(ChatColor.GOLD + "You voted for "
 						+ ChatColor.WHITE + map);
 				return true;
@@ -70,11 +51,15 @@ public class VotingManager {
 		}
 		return winner;
 	}
-
+	
 	public void end() {
-		statBoard.hide();
+		running = false;
 	}
-
+	
+	public boolean isRunning() {
+		return running;
+	}
+	
 	public Set<String> getMaps() {
 		return maps;
 	}

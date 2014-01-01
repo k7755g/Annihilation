@@ -6,7 +6,8 @@ import java.util.Random;
 import java.util.Set;
 
 import net.coasterman10.Annihilation.Annihilation;
-import net.coasterman10.Annihilation.kits.KitType;
+import net.coasterman10.Annihilation.Kit;
+import net.coasterman10.Annihilation.PlayerMeta;
 import net.coasterman10.Annihilation.maps.GameMap;
 
 import org.bukkit.Location;
@@ -59,7 +60,6 @@ public class ResourceListener implements Listener {
 
 	public ResourceListener(Annihilation plugin) {
 		this.plugin = plugin;
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 	}
 
 	@EventHandler(ignoreCancelled = false)
@@ -94,7 +94,7 @@ public class ResourceListener implements Listener {
 					qty = 3 + new Random().nextInt(4);
 				}
 				if (material.name().contains("ORE")) {
-					if (plugin.getKitManager().getKit(player) == KitType.MINER)
+					if (PlayerMeta.getMeta(player).getKit() == Kit.MINER)
 						qty *= 2;
 				}
 				player.getInventory().addItem(

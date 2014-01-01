@@ -1,6 +1,7 @@
 package net.coasterman10.Annihilation;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 import net.coasterman10.Annihilation.bar.BarUtil;
@@ -29,7 +30,7 @@ public class RestartTimer {
 							return;
 						}
 						String message = "Total time: " + totalTime
-								+ " | Restarting in " + time;
+								+ " | " + ChatColor.GREEN + "Restarting in " + time;
 						float percent = (float) time / (float) delay;
 						for (Player p : Bukkit.getOnlinePlayers())
 							BarUtil.setMessageAndPercent(p, message, percent);

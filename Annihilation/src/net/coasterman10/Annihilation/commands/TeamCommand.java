@@ -1,10 +1,10 @@
 package net.coasterman10.Annihilation.commands;
 
 import net.coasterman10.Annihilation.Annihilation;
-import net.coasterman10.Annihilation.teams.Team;
-import net.coasterman10.Annihilation.teams.TeamManager;
-import net.coasterman10.Annihilation.teams.TeamName;
+import net.coasterman10.Annihilation.AnnihilationTeam;
+import net.coasterman10.Annihilation.PlayerMeta;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -13,12 +13,9 @@ import org.bukkit.entity.Player;
 
 public class TeamCommand implements CommandExecutor {
 	private final Annihilation plugin;
-	private final TeamManager teamManager;
 
-	public TeamCommand(Annihilation plugin, TeamManager teamManager) {
-		plugin.getCommand("team").setExecutor(this);
+	public TeamCommand(Annihilation plugin) {
 		this.plugin = plugin;
-		this.teamManager = teamManager;
 	}
 
 	@Override
@@ -37,16 +34,17 @@ public class TeamCommand implements CommandExecutor {
 	}
 
 	private void joinTeam(Player player, String team) {
-		if (!teamManager.inLobby(player)) {
-			Team currentTeam = teamManager.getTeamWithPlayer(player);
-			player.sendMessage(ChatColor.RED + "You are already on "
-					+ currentTeam.getFullName() + "!");
+		PlayerMeta meta = PlayerMeta.getMeta(player);
+		if (meta.getTeam() != AnnihilationTeam.NONE) {
+			AnnihilationTeam currentTeam = meta.getTeam();
+			player.sendMessage(ChatColor.DARK_AQUA + "You are already on "
+					+ currentTeam.coloredName());
 			return;
 		}
 
-		Team target;
+		AnnihilationTeam target;
 		try {
-			target = teamManager.getTeam(TeamName.valueOf(team.toUpperCase()));
+			target = AnnihilationTeam.valueOf(team.toUpperCase());
 		} catch (IllegalArgumentException e) {
 			player.sendMessage(ChatColor.RED + "\"" + team
 					+ "\" is not a valid team name!");
@@ -54,35 +52,33 @@ public class TeamCommand implements CommandExecutor {
 			return;
 		}
 
-		target.addPlayer(player.getName());
 		player.sendMessage(ChatColor.DARK_AQUA + "You joined "
-				+ target.getFullName());
+				+ target.coloredName());
+		meta.setTeam(target);
 
 		if (plugin.getPhase() > 0) {
-			player.teleport(plugin.getMapManager().getSpawnPoint(
-					target.getName()));
-			plugin.getKitManager().getKit(player).getKitClass()
-					.give(player, target.getName());
-			plugin.getIngameScoreboardmanager().setCurrentForPlayers(player);
+			player.teleport(target.getRandomSpawn());
+			meta.getKit().give(player, target);
 		}
-
-		plugin.getVotingManager().getScoreboard()
-				.getTeam(target.getName().name()).addPlayer(player);
-		plugin.getIngameScoreboardmanager().getScoreboard()
-				.getTeam(target.getName().name()).addPlayer(player);
 	}
 
 	private void listTeams(CommandSender sender) {
 		sender.sendMessage(ChatColor.GRAY + "============[ "
 				+ ChatColor.DARK_AQUA + "Teams" + ChatColor.GRAY
 				+ " ]============");
-		for (Team t : teamManager.getTeams()) {
-			if (t.getSize() != 1) {
-				sender.sendMessage(t.getFullName() + " - " + t.getSize()
-						+ " players");
+		for (AnnihilationTeam t : AnnihilationTeam.values()) {
+			int size = 0;
+
+			for (Player p : Bukkit.getOnlinePlayers()) {
+				PlayerMeta meta = PlayerMeta.getMeta(p);
+				if (meta.getTeam() == t)
+					size++;
+			}
+
+			if (size != 1) {
+				sender.sendMessage(t.coloredName() + " - " + size + " players");
 			} else {
-				sender.sendMessage(t.getFullName() + " - " + t.getSize()
-						+ " player");
+				sender.sendMessage(t.coloredName() + " - " + size + " player");
 			}
 		}
 		sender.sendMessage(ChatColor.GRAY + "===============================");

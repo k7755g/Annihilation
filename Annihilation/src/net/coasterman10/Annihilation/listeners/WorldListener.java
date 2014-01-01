@@ -12,7 +12,6 @@ import org.bukkit.event.block.BlockFromToEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 public class WorldListener implements Listener {
-	private Annihilation plugin;
 	private static final Set<EntityType> hostileEntityTypes = new HashSet<EntityType>() {
 		private static final long serialVersionUID = 42L;
 		{
@@ -27,14 +26,9 @@ public class WorldListener implements Listener {
 		}
 	};
 
-	public WorldListener(Annihilation plugin) {
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
-		this.plugin = plugin;
-	}
-
 	@EventHandler
 	public void onWaterFlow(BlockFromToEvent e) {
-		if (plugin.isEmptyColumn(e.getToBlock().getLocation()))
+		if (Annihilation.isEmptyColumn(e.getToBlock().getLocation()))
 			e.setCancelled(true);
 	}
 

@@ -37,7 +37,6 @@ public class WandListener implements Listener {
 	private final HashMap<String, Boolean> masterCooldown = new HashMap<String, Boolean>();
 
 	public WandListener(Annihilation plugin) {
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
 		this.plugin = plugin;
 	}
 

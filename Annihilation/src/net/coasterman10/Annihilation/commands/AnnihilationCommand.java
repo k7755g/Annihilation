@@ -12,7 +12,6 @@ public class AnnihilationCommand implements CommandExecutor {
 
 	public AnnihilationCommand(Annihilation plugin) {
 		this.plugin = plugin;
-		plugin.getCommand("annihilation").setExecutor(this);
 	}
 
 	@Override

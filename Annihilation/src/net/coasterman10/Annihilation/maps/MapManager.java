@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.coasterman10.Annihilation.Annihilation;
-import net.coasterman10.Annihilation.teams.TeamName;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -66,14 +65,6 @@ public class MapManager {
 		return currentMap;
 	}
 
-	public Location getSpawnPoint(TeamName teamName) {
-		return getCurrentMap().getSpawnPoint(teamName);
-	}
-
-	public Location getNexus(TeamName team) {
-		return currentMap.getNexusLocation(team);
-	}
-
 	public Location getLobbySpawnPoint() {
 		return lobbySpawn;
 	}
@@ -86,5 +77,10 @@ public class MapManager {
 	
 	public void reset() {
 		currentMap = null;
+	}
+
+	public Location getNexus(String string) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

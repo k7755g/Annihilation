@@ -3,7 +3,6 @@ package net.coasterman10.Annihilation.listeners;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import net.coasterman10.Annihilation.Annihilation;
 import net.coasterman10.Annihilation.SoundUtil;
 
 import org.bukkit.ChatColor;
@@ -20,10 +19,6 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 public class SoulboundListener implements Listener {
 	private static final String soulboundTag = ChatColor.GOLD + "Soulbound";
-
-	public SoulboundListener(Annihilation plugin) {
-		plugin.getServer().getPluginManager().registerEvents(this, plugin);
-	}
 
 	@EventHandler
 	public void onSoulboundDrop(PlayerDropItemEvent e) {

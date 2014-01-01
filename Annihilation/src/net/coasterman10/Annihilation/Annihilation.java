@@ -6,7 +6,11 @@ import net.coasterman10.Annihilation.bar.BarUtil;
 import net.coasterman10.Annihilation.chat.ChatListener;
 import net.coasterman10.Annihilation.chat.ChatUtil;
 import net.coasterman10.Annihilation.commands.AnnihilationCommand;
-import net.coasterman10.Annihilation.kits.KitManager;
+import net.coasterman10.Annihilation.commands.ClassCommand;
+import net.coasterman10.Annihilation.commands.StatsCommand;
+import net.coasterman10.Annihilation.commands.TeamCommand;
+import net.coasterman10.Annihilation.commands.UnlockCommand;
+import net.coasterman10.Annihilation.commands.VoteCommand;
 import net.coasterman10.Annihilation.listeners.PlayerListener;
 import net.coasterman10.Annihilation.listeners.ResourceListener;
 import net.coasterman10.Annihilation.listeners.SoulboundListener;
@@ -17,8 +21,6 @@ import net.coasterman10.Annihilation.maps.VotingManager;
 import net.coasterman10.Annihilation.stats.DatabaseHandler;
 import net.coasterman10.Annihilation.stats.StatType;
 import net.coasterman10.Annihilation.stats.StatsManager;
-import net.coasterman10.Annihilation.teams.Team;
-import net.coasterman10.Annihilation.teams.TeamManager;
 
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.ChatColor;
@@ -26,19 +28,17 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Annihilation extends JavaPlugin {
 	private ConfigManager configManager;
 	private VotingManager voting;
 	private MapManager maps;
-	private TeamManager teams;
 	private PhaseTimer timer;
 	private ResourceListener resources;
 	private StatsManager stats;
 	private DatabaseHandler db;
-	private KitManager kits;
-	private IngameScoreboardManager ingameScoreboard;
 	public boolean useMysql = false;
 
 	@Override
@@ -48,32 +48,39 @@ public final class Annihilation extends JavaPlugin {
 				"stats.yml");
 
 		maps = new MapManager(this, configManager.getConfig("maps.yml"));
-		teams = new TeamManager(this);
 
 		Configuration shops = configManager.getConfig("shops.yml");
 		new Shop(this, "Weapon", shops);
 		new Shop(this, "Brewing", shops);
 
-		stats = new StatsManager(this);
+		stats = new StatsManager(this, configManager);
 		resources = new ResourceListener(this);
-		kits = new KitManager(this);
-		ingameScoreboard = new IngameScoreboardManager(this);
 
 		Configuration config = configManager.getConfig("config.yml");
-		timer = new PhaseTimer(this, config);
+		timer = new PhaseTimer(this, config.getInt("start-delay"),
+				config.getInt("phase-period"));
 		voting = new VotingManager(this);
 
-		new AnnihilationCommand(this);
-		new ChestLocker(this);
-		new ChatListener(this);
-		new PlayerListener(this);
-		new WorldListener(this);
-		new SoulboundListener(this);
-		new WandListener(this);
-		
-		BarUtil.init(this);
+		PluginManager pm = getServer().getPluginManager();
 
-		voting.setCurrentForPlayers(getServer().getOnlinePlayers());
+		ChestLocker cl = new ChestLocker();
+		pm.registerEvents(cl, this);
+
+		pm.registerEvents(resources, this);
+		pm.registerEvents(new ChatListener(this), this);
+		pm.registerEvents(new PlayerListener(this), this);
+		pm.registerEvents(new WorldListener(), this);
+		pm.registerEvents(new SoulboundListener(), this);
+		pm.registerEvents(new WandListener(this), this);
+
+		getCommand("annihilation").setExecutor(new AnnihilationCommand(this));
+		getCommand("class").setExecutor(new ClassCommand());
+		getCommand("stats").setExecutor(new StatsCommand(stats));
+		getCommand("team").setExecutor(new TeamCommand(this));
+		getCommand("unlock").setExecutor(new UnlockCommand(cl));
+		getCommand("vote").setExecutor(new VoteCommand(voting));
+
+		BarUtil.init(this);
 
 		if (config.getString("stats").equalsIgnoreCase("sql"))
 			useMysql = true;
@@ -86,10 +93,13 @@ public final class Annihilation extends JavaPlugin {
 			String pass = config.getString("MySQL.pass");
 			db = new DatabaseHandler(host, port, name, user, pass, this);
 
-			db.query("CREATE TABLE IF NOT EXISTS `annihilation` ( `username` varchar(16) NOT NULL, `kills` int(16) NOT NULL, `deaths` int(16) NOT NULL, `wins` int(16) NOT NULL, `losses` int(16) NOT NULL, `nexus_damage` int(16) NOT NULL, UNIQUE KEY `username` (`username`) ) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
+			db.query("CREATE TABLE IF NOT EXISTS `annihilation` ( `username` varchar(16) NOT NULL, "
+					+ "`kills` int(16) NOT NULL, `deaths` int(16) NOT NULL, `wins` int(16) NOT NULL, "
+					+ "`losses` int(16) NOT NULL, `nexus_damage` int(16) NOT NULL, "
+					+ "UNIQUE KEY `username` (`username`) ) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
 		} else
 			db = new DatabaseHandler(this);
-		
+
 		reset();
 	}
 
@@ -98,22 +108,24 @@ public final class Annihilation extends JavaPlugin {
 			return false;
 
 		timer.start();
-		voting.setCurrentForPlayers(getServer().getOnlinePlayers());
 
 		return true;
 	}
 
 	public void startGame() {
-		for (Team t : teams.getTeams()) {
-			for (Player p : t.getPlayers()) {
-				Location spawn = maps.getSpawnPoint(t.getName());
-				p.teleport(spawn);
-				kits.getKit(p).getKitClass().give(p, t.getName());
-				ingameScoreboard.setCurrentForPlayers(p);
-			}
+		ScoreboardUtil.setTitle(ChatColor.GOLD + "Map: "
+				+ WordUtils.capitalize(voting.getWinner()));
 
-			t.loadNexus(maps.getNexus(t.getName()), 25);
-			ingameScoreboard.updateScore(t);
+		for (Player p : getServer().getOnlinePlayers()) {
+			PlayerMeta meta = PlayerMeta.getMeta(p);
+			p.teleport(meta.getTeam().getRandomSpawn());
+			meta.getKit().give(p, meta.getTeam());
+		}
+
+		for (AnnihilationTeam t : AnnihilationTeam.values()) {
+			t.loadNexus(maps.getNexus(t.toString()), 25);
+			ScoreboardUtil.registerTeam(t.toString(), t.color());
+			ScoreboardUtil.setScore(t.toString(), t.getNexus().getHealth());
 		}
 
 		resources.loadDiamonds();
@@ -136,8 +148,6 @@ public final class Annihilation extends JavaPlugin {
 				getServer().broadcastMessage(
 						"Could not load " + voting.getWinner());
 			voting.end();
-			ingameScoreboard.setTitle(ChatColor.GOLD + "Map: "
-					+ WordUtils.capitalize(voting.getWinner()));
 		}
 
 		if (time == 0L)
@@ -148,16 +158,8 @@ public final class Annihilation extends JavaPlugin {
 		return timer.getPhase();
 	}
 
-	public TeamManager getTeamManager() {
-		return teams;
-	}
-
 	public MapManager getMapManager() {
 		return maps;
-	}
-
-	public ConfigManager getConfigManager() {
-		return configManager;
 	}
 
 	public StatsManager getStatsManager() {
@@ -166,10 +168,6 @@ public final class Annihilation extends JavaPlugin {
 
 	public DatabaseHandler getDatabaseHandler() {
 		return db;
-	}
-
-	public KitManager getKitManager() {
-		return kits;
 	}
 
 	public int getPhaseDelay() {
@@ -184,7 +182,7 @@ public final class Annihilation extends JavaPlugin {
 		return voting;
 	}
 
-	public boolean isEmptyColumn(Location loc) {
+	public static boolean isEmptyColumn(Location loc) {
 		boolean hasBlock = false;
 		Location test = loc.clone();
 		for (int y = 0; y < loc.getWorld().getMaxHeight(); y++) {
@@ -195,29 +193,43 @@ public final class Annihilation extends JavaPlugin {
 		return !hasBlock;
 	}
 
-	public IngameScoreboardManager getIngameScoreboardmanager() {
-		return ingameScoreboard;
-	}
-
-	public void endGame(Team winner) {
+	public void endGame(AnnihilationTeam winner) {
+		if (winner == null)
+			return;
+		
 		ChatUtil.winMessage(winner);
 		timer.stop();
 
-		for (Player p : winner.getPlayers())
-			stats.incrementStat(StatType.WINS, p);
+		for (Player p : getServer().getOnlinePlayers())
+			if (PlayerMeta.getMeta(p).getTeam() == winner)
+				stats.incrementStat(StatType.WINS, p);
 		long restartDelay = configManager.getConfig("config.yml").getLong(
 				"restart-delay");
 		new RestartTimer(this, restartDelay).start(timer.getTime());
 	}
 
 	public void reset() {
-		teams.reset();
 		maps.reset();
 		timer.reset();
 		for (Player p : getServer().getOnlinePlayers()) {
 			p.getInventory().clear();
 			p.teleport(maps.getLobbySpawnPoint());
-			BarUtil.setMessageAndPercent(p, ChatColor.DARK_AQUA + "Welcome to Annihilation!", 0.01F);
+			BarUtil.setMessageAndPercent(p, ChatColor.DARK_AQUA
+					+ "Welcome to Annihilation!", 0.01F);
+		}
+	}
+
+	public void checkWin() {
+		int alive = 0;
+		AnnihilationTeam aliveTeam = null;
+		for (AnnihilationTeam t : AnnihilationTeam.values()) {
+			if (t.getNexus().isAlive()) {
+				alive++;
+				aliveTeam = t;
+			}
+		}
+		if (alive == 1) {
+			endGame(aliveTeam);
 		}
 	}
 }

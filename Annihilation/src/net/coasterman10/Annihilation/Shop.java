@@ -168,7 +168,7 @@ public class Shop implements Listener {
 						String itemName = params[3].replace("\"", "");
 						// Longest method name ever. Great job bukkit team.
 						item.setName(ChatColor.translateAlternateColorCodes(
-								'$', itemName));
+								'&', itemName));
 					}
 					items.add(item);
 				}
