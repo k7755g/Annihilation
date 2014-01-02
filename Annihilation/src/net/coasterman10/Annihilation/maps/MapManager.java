@@ -17,11 +17,9 @@ public class MapManager {
 	private GameMap currentMap = null;
 	private Location lobbySpawn;
 	private MapLoader mapLoader;
-	private Configuration config;
-
+	
 	public MapManager(Annihilation plugin, Configuration config) {
 		mapLoader = new MapLoader(plugin.getLogger(), plugin.getDataFolder());
-		this.config = config;
 
 		for (String s : config.getKeys(false)) {
 			if (!s.equalsIgnoreCase("lobby"))
@@ -52,8 +50,7 @@ public class MapManager {
 	}
 
 	public boolean selectMap(String mapName) {
-		currentMap = new GameMap(mapLoader,
-				config.getConfigurationSection(mapName));
+		currentMap = new GameMap(mapLoader);
 		return currentMap.loadIntoGame(mapName);
 	}
 
@@ -77,10 +74,5 @@ public class MapManager {
 	
 	public void reset() {
 		currentMap = null;
-	}
-
-	public Location getNexus(String string) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 }

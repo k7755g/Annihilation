@@ -9,17 +9,12 @@ import net.coasterman10.Annihilation.bar.BarUtil;
 import net.coasterman10.Annihilation.chat.ChatUtil;
 import net.coasterman10.Annihilation.maps.MapManager;
 import net.coasterman10.Annihilation.stats.StatType;
-import net.coasterman10.EnderToolsAPI.EnderToolsAPI;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -40,56 +35,33 @@ public class PlayerListener implements Listener {
 
 	@EventHandler
 	public void onInteract(PlayerInteractEvent e) {
-		if (Bukkit.getPluginManager().getPlugin("EnderToolsAPI") == null)
-			return;
 
-		if (e.getAction() != Action.RIGHT_CLICK_BLOCK)
-			return;
-		Block b = e.getClickedBlock();
-
-		boolean shouldCancel = true;
-
-		if (b.getType() == Material.WORKBENCH)
-			EnderToolsAPI.openWorkbench(e.getPlayer());
-		else if (b.getType() == Material.FURNACE)
-			EnderToolsAPI.openFurnace(e.getPlayer());
-		else if (b.getType() == Material.BREWING_STAND)
-			EnderToolsAPI.openBrewingStand(e.getPlayer());
-		else
-			shouldCancel = false;
-
-		if (shouldCancel)
-			e.setCancelled(true);
 	}
 
 	@EventHandler
 	public void onPlayerRespawn(PlayerRespawnEvent e) {
 		Player player = e.getPlayer();
-		AnnihilationTeam team = PlayerMeta.getMeta(player).getTeam();
-		if (team == null)
+		PlayerMeta meta = PlayerMeta.getMeta(player);
+		if (meta.isAlive()) {
+			e.setRespawnLocation(meta.getTeam().getRandomSpawn());
+			meta.getKit().give(player, meta.getTeam());
+		} else
 			e.setRespawnLocation(mapManager.getLobbySpawnPoint());
-		else if (!team.getNexus().isAlive() || plugin.getPhase() == 0)
-			e.setRespawnLocation(mapManager.getLobbySpawnPoint());
-		else {
-			e.setRespawnLocation(team.getRandomSpawn());
-			PlayerMeta.getMeta(player).getKit().give(player, team);
-		}
 	}
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
 		Player player = e.getPlayer();
-		AnnihilationTeam team = PlayerMeta.getMeta(player).getTeam();
-		if (team == null)
-			player.teleport(mapManager.getLobbySpawnPoint());
-		else if (!team.getNexus().isAlive() || plugin.getPhase() == 0)
-			player.teleport(mapManager.getLobbySpawnPoint());
+		PlayerMeta meta = PlayerMeta.getMeta(player);
+		if (meta.isAlive())
+			player.teleport(meta.getTeam().getRandomSpawn());
 		else
-			player.teleport(team.getRandomSpawn());
+			player.teleport(mapManager.getLobbySpawnPoint());
 
 		if (plugin.useMysql) {
 			plugin.getDatabaseHandler()
-					.query("INSERT IGNORE INTO `annihilation` (`username`, `kills`, `deaths`, `wins`, `losses`, `nexus_damage`) VALUES "
+					.query("INSERT IGNORE INTO `annihilation` (`username`, `kills`, "
+							+ "`deaths`, `wins`, `losses`, `nexus_damage`) VALUES "
 							+ "('"
 							+ player.getName()
 							+ "', '0', '0', '0', '0', '0');");
@@ -150,40 +122,42 @@ public class PlayerListener implements Listener {
 
 	@EventHandler
 	public void onBreak(BlockBreakEvent e) {
-		if (Annihilation.isEmptyColumn(e.getBlock().getLocation()))
-			e.setCancelled(true);
-		for (AnnihilationTeam t : AnnihilationTeam.values()) {
-			if (t.getNexus().getLocation().equals(e.getBlock().getLocation())
-					&& e.getBlock().getType() != Material.BEDROCK) {
+		for (AnnihilationTeam t : AnnihilationTeam.teams()) {
+			if (t.getNexus().getLocation().equals(e.getBlock().getLocation())) {
 				e.setCancelled(true);
-				Player breaker = e.getPlayer();
-				AnnihilationTeam attacker = PlayerMeta.getMeta(breaker)
-						.getTeam();
-				if (t == attacker)
-					breaker.sendMessage(ChatColor.AQUA
-							+ "You can't damage your own nexus");
-				else if (plugin.getPhase() == 1)
-					breaker.sendMessage(ChatColor.AQUA
-							+ "Nexuses are invincible in phase 1");
-				else {
-					t.getNexus().damage(plugin.getPhase() == 5 ? 2 : 1);
-					plugin.getStatsManager().incrementStat(
-							StatType.NEXUS_DAMAGE, breaker);
-					for (Player p : Bukkit.getOnlinePlayers())
-						if (PlayerMeta.getMeta(p).getTeam() == attacker)
-							p.sendMessage(ChatUtil.nexusBreakMessage(breaker,
-									attacker, t));
+				if (t.getNexus().isAlive())
+					breakNexus(t, e.getPlayer());
+				break;
+			}
+		}
+	}
 
-					if (t.getNexus().getHealth() == 0) {
-						ChatUtil.nexusDestroyed(attacker, t);
-						plugin.checkWin();
-						for (Player p : Bukkit.getOnlinePlayers())
-							if (PlayerMeta.getMeta(p).getTeam() == t)
-								plugin.getStatsManager().incrementStat(
-										StatType.LOSSES, p);
+	private void breakNexus(AnnihilationTeam victim, Player breaker) {
+		AnnihilationTeam attacker = PlayerMeta.getMeta(breaker).getTeam();
+		if (victim == attacker)
+			breaker.sendMessage(ChatColor.DARK_AQUA
+					+ "You can't damage your own nexus");
+		else if (plugin.getPhase() == 1)
+			breaker.sendMessage(ChatColor.DARK_AQUA
+					+ "Nexuses are invincible in phase 1");
+		else {
+			victim.getNexus().damage(plugin.getPhase() == 5 ? 2 : 1);
+			plugin.getStatsManager().incrementStat(StatType.NEXUS_DAMAGE,
+					breaker);
 
-					}
-				}
+			String msg = ChatUtil.nexusBreakMessage(breaker, attacker, victim);
+			for (Player p : attacker.getPlayers())
+				p.sendMessage(msg);
+
+			ScoreboardUtil.setScore(victim.coloredName() + " Nexus", victim
+					.getNexus().getHealth());
+
+			if (victim.getNexus().getHealth() == 0) {
+				ScoreboardUtil.removeScore(victim.coloredName() + " Nexus");
+				ChatUtil.nexusDestroyed(attacker, victim);
+				plugin.checkWin();
+				for (Player p : victim.getPlayers())
+					plugin.getStatsManager().incrementStat(StatType.LOSSES, p);
 			}
 		}
 	}

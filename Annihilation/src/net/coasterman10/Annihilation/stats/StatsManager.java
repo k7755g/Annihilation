@@ -15,6 +15,7 @@ public class StatsManager {
 
 	public StatsManager(Annihilation instance, ConfigManager config) {
 		this.plugin = instance;
+		this.config = config;
 	}
 
 	public int getStat(StatType s, Player p) {

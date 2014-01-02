@@ -4,6 +4,9 @@ start-delay: 120
 # Phase length in seconds (Phase 5 is perpetual)
 phase-period: 600
 
+# When the game ends, the delay before resetting the game
+restart-delay: 120
+
 # Stat system: "flatfile" for yml or "sql" for MySQL
 stats: flatfile
 

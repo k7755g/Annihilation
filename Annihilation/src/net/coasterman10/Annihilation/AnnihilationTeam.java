@@ -29,7 +29,7 @@ public enum AnnihilationTeam {
 	public String toString() {
 		return name().substring(0, 1) + name().substring(1).toLowerCase();
 	}
-	
+
 	public String coloredName() {
 		return color().toString() + toString();
 	}
@@ -39,19 +39,24 @@ public enum AnnihilationTeam {
 	}
 
 	public Nexus getNexus() {
-		return nexus;
+		if (this != NONE)
+			return nexus;
+		else
+			return null;
 	}
 
 	public void loadNexus(Location loc, int health) {
-		nexus = new Nexus(this, loc, health);
+		if (this != NONE)
+			nexus = new Nexus(this, loc, health);
 	}
 
 	public void addSpawn(Location loc) {
-		spawns.add(loc);
+		if (this != NONE)
+			spawns.add(loc);
 	}
 
 	public Location getRandomSpawn() {
-		if (!spawns.isEmpty())
+		if (!spawns.isEmpty() && this != NONE)
 			return spawns.get(new Random().nextInt(spawns.size()));
 		return null;
 	}
@@ -59,8 +64,12 @@ public enum AnnihilationTeam {
 	public List<Player> getPlayers() {
 		List<Player> players = new ArrayList<Player>();
 		for (Player p : Bukkit.getOnlinePlayers())
-			if (PlayerMeta.getMeta(p).getTeam() == this)
+			if (PlayerMeta.getMeta(p).getTeam() == this && this != NONE)
 				players.add(p);
 		return players;
+	}
+
+	public static AnnihilationTeam[] teams() {
+		return new AnnihilationTeam[] { RED, YELLOW, GREEN, BLUE };
 	}
 }

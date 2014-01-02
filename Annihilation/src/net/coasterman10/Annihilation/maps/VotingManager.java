@@ -11,18 +11,30 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 public class VotingManager {
+	private final Annihilation plugin;
 	private final HashSet<String> maps = new HashSet<String>();
 	private final HashMap<String, String> votes = new HashMap<String, String>();
-	private boolean running = true;
+	private boolean running = false;
 	
 	public VotingManager(Annihilation plugin) {
+		this.plugin = plugin;
+	}
+	
+	public void start() {
+		maps.clear();
+		votes.clear();
+		
+		ScoreboardUtil.removeAllScores();
 		String title = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Voting";
 		ScoreboardUtil.setTitle(title);
 
 		for (String map : plugin.getMapManager().getRandomMaps()) {
 			maps.add(map);
+			ScoreboardUtil.setScore(map, 1);
 			ScoreboardUtil.setScore(map, 0);
 		}
+		
+		running = true;
 	}
 
 	public boolean vote(CommandSender voter, String vote) {

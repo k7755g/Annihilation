@@ -59,6 +59,7 @@ public class TeamCommand implements CommandExecutor {
 		if (plugin.getPhase() > 0) {
 			player.teleport(target.getRandomSpawn());
 			meta.getKit().give(player, target);
+			meta.setAlive(true);
 		}
 	}
 
@@ -66,7 +67,7 @@ public class TeamCommand implements CommandExecutor {
 		sender.sendMessage(ChatColor.GRAY + "============[ "
 				+ ChatColor.DARK_AQUA + "Teams" + ChatColor.GRAY
 				+ " ]============");
-		for (AnnihilationTeam t : AnnihilationTeam.values()) {
+		for (AnnihilationTeam t : AnnihilationTeam.teams()) {
 			int size = 0;
 
 			for (Player p : Bukkit.getOnlinePlayers()) {

@@ -12,7 +12,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;;
+import org.bukkit.event.player.PlayerTeleportEvent;
+
+;
 
 public class BarUtil implements Listener {
 	private static BarUtil instance;
@@ -72,7 +74,8 @@ public class BarUtil implements Listener {
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerTeleport(PlayerTeleportEvent event) {
-		handleTeleport(event.getPlayer(), event.getTo().clone());
+		if (event.getTo() != null)
+			handleTeleport(event.getPlayer(), event.getTo().clone());
 	}
 
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)

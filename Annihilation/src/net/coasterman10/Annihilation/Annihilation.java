@@ -1,5 +1,7 @@
 package net.coasterman10.Annihilation;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 
 import net.coasterman10.Annihilation.bar.BarUtil;
@@ -26,7 +28,10 @@ import org.apache.commons.lang.WordUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.Configuration;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -112,23 +117,49 @@ public final class Annihilation extends JavaPlugin {
 		return true;
 	}
 
+	public void loadMap(final String map) {
+		FileConfiguration config = configManager.getConfig("maps.yml");
+		ConfigurationSection section = config.getConfigurationSection(map);
+
+		World w = getServer().getWorld(map);
+
+		for (AnnihilationTeam team : AnnihilationTeam.teams()) {
+			String name = team.name().toLowerCase();
+			if (section.contains("spawns." + name)) {
+				for (String s : section.getStringList("spawns." + name))
+					team.addSpawn(parseLocation(getServer().getWorld(map), s));
+			}
+			if (section.contains("nexuses." + name)) {
+				Location loc = parseLocation(w,
+						section.getString("nexuses." + name));
+				team.loadNexus(loc, 25);
+			}
+		}
+
+		if (section.contains("diamonds")) {
+			Set<Location> diamonds = new HashSet<Location>();
+			for (String s : section.getStringList("diamonds"))
+				diamonds.add(parseLocation(w, s));
+			resources.loadDiamonds(diamonds);
+		}
+	}
+
 	public void startGame() {
 		ScoreboardUtil.setTitle(ChatColor.GOLD + "Map: "
 				+ WordUtils.capitalize(voting.getWinner()));
+		ScoreboardUtil.removeAllScores();
+		for (AnnihilationTeam t : AnnihilationTeam.teams())
+			ScoreboardUtil.setScore(t.coloredName() + " Nexus", t.getNexus()
+					.getHealth());
 
 		for (Player p : getServer().getOnlinePlayers()) {
 			PlayerMeta meta = PlayerMeta.getMeta(p);
-			p.teleport(meta.getTeam().getRandomSpawn());
-			meta.getKit().give(p, meta.getTeam());
+			if (meta.getTeam() != AnnihilationTeam.NONE) {
+				meta.setAlive(true);
+				p.teleport(meta.getTeam().getRandomSpawn());
+				meta.getKit().give(p, meta.getTeam());
+			}
 		}
-
-		for (AnnihilationTeam t : AnnihilationTeam.values()) {
-			t.loadNexus(maps.getNexus(t.toString()), 25);
-			ScoreboardUtil.registerTeam(t.toString(), t.color());
-			ScoreboardUtil.setScore(t.toString(), t.getNexus().getHealth());
-		}
-
-		resources.loadDiamonds();
 	}
 
 	public void advancePhase() {
@@ -141,12 +172,12 @@ public final class Annihilation extends JavaPlugin {
 		long time = timer.getTime();
 
 		if (time == -5L) {
-			if (maps.selectMap(voting.getWinner()))
-				getServer().broadcastMessage(
-						voting.getWinner() + " selected, loading...");
-			else
-				getServer().broadcastMessage(
-						"Could not load " + voting.getWinner());
+			String winner = voting.getWinner();
+			maps.selectMap(winner);
+			getServer().broadcastMessage(
+					ChatColor.GREEN + winner + " selected, loading...");
+			loadMap(winner);
+
 			voting.end();
 		}
 
@@ -196,7 +227,7 @@ public final class Annihilation extends JavaPlugin {
 	public void endGame(AnnihilationTeam winner) {
 		if (winner == null)
 			return;
-		
+
 		ChatUtil.winMessage(winner);
 		timer.stop();
 
@@ -209,20 +240,24 @@ public final class Annihilation extends JavaPlugin {
 	}
 
 	public void reset() {
+		ScoreboardUtil.showForPlayers(getServer().getOnlinePlayers());
 		maps.reset();
 		timer.reset();
 		for (Player p : getServer().getOnlinePlayers()) {
+			PlayerMeta.getMeta(p).setTeam(AnnihilationTeam.NONE);
 			p.getInventory().clear();
 			p.teleport(maps.getLobbySpawnPoint());
 			BarUtil.setMessageAndPercent(p, ChatColor.DARK_AQUA
 					+ "Welcome to Annihilation!", 0.01F);
 		}
+		
+		voting.start();
 	}
 
 	public void checkWin() {
 		int alive = 0;
 		AnnihilationTeam aliveTeam = null;
-		for (AnnihilationTeam t : AnnihilationTeam.values()) {
+		for (AnnihilationTeam t : AnnihilationTeam.teams()) {
 			if (t.getNexus().isAlive()) {
 				alive++;
 				aliveTeam = t;
@@ -231,5 +266,21 @@ public final class Annihilation extends JavaPlugin {
 		if (alive == 1) {
 			endGame(aliveTeam);
 		}
+	}
+
+	public static Location parseLocation(World w, String in) {
+		String[] params = in.split(",");
+		if (params.length == 3 || params.length == 5) {
+			double x = Double.parseDouble(params[0]);
+			double y = Double.parseDouble(params[1]);
+			double z = Double.parseDouble(params[2]);
+			Location loc = new Location(w, x, y, z);
+			if (params.length == 5) {
+				loc.setYaw(Float.parseFloat(params[4]));
+				loc.setPitch(Float.parseFloat(params[5]));
+			}
+			return loc;
+		}
+		return null;
 	}
 }

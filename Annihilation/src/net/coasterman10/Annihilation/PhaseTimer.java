@@ -85,7 +85,7 @@ public class PhaseTimer {
 
 		if (getRemainingPhaseTime() == 0) {
 			phase++;
-			ChatUtil.phaseMessage(phase);
+			plugin.advancePhase();
 		}
 
 		float percent;
@@ -99,7 +99,7 @@ public class PhaseTimer {
 				percent = 1F;
 			else
 				percent = (float) getRemainingPhaseTime() / (float) phaseTime;
-			text = getPhaseColor() + "Phase " + phase + ChatColor.WHITE + " | "
+			text = getPhaseColor() + "Phase " + ChatUtil.translateRoman(phase) + ChatColor.WHITE + " | "
 					+ timeString(time);
 		}
 

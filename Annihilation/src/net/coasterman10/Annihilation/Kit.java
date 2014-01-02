@@ -1,5 +1,6 @@
 package net.coasterman10.Annihilation;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import net.coasterman10.Annihilation.listeners.SoulboundListener;
@@ -44,7 +45,7 @@ public enum Kit {
 		}
 	};
 
-	List<ItemStack> spawnItems;
+	List<ItemStack> spawnItems = new ArrayList<ItemStack>();
 	ItemStack[] spawnArmor = new ItemStack[] {
 			new ItemStack(Material.LEATHER_HELMET),
 			new ItemStack(Material.LEATHER_CHESTPLATE),

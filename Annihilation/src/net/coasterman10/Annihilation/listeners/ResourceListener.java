@@ -8,7 +8,6 @@ import java.util.Set;
 import net.coasterman10.Annihilation.Annihilation;
 import net.coasterman10.Annihilation.Kit;
 import net.coasterman10.Annihilation.PlayerMeta;
-import net.coasterman10.Annihilation.maps.GameMap;
 
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -36,6 +35,8 @@ public class ResourceListener implements Listener {
 
 	private final Annihilation plugin;
 	private final HashSet<Location> queue = new HashSet<Location>();
+	private Set<Location> diamonds = new HashSet<Location>();
+
 	private final static HashMap<Material, Resource> resources = new HashMap<Material, Resource>();
 
 	static {
@@ -118,32 +119,17 @@ public class ResourceListener implements Listener {
 		}
 	}
 
-	public void loadDiamonds() {
-		GameMap map = plugin.getMapManager().getCurrentMap();
-		if (map == null)
-			return;
-
-		Set<Location> diamondLocations = map.getDiamondLocations();
-		if (diamondLocations == null)
-			return;
-
+	public void loadDiamonds(Set<Location> diamondLocations) {
 		for (Location loc : diamondLocations) {
-			loc.getBlock().setType(Material.AIR);
+			if (loc.getBlock().getType() == Material.DIAMOND_ORE)
+				loc.getBlock().setType(Material.AIR);
+			diamonds.add(loc);
 		}
 	}
 
 	public void spawnDiamonds() {
-		GameMap map = plugin.getMapManager().getCurrentMap();
-		if (map == null)
-			return;
-
-		Set<Location> diamondLocations = map.getDiamondLocations();
-		if (diamondLocations == null)
-			return;
-
-		for (Location loc : diamondLocations) {
+		for (Location loc : diamonds)
 			loc.getBlock().setType(Material.DIAMOND_ORE);
-		}
 	}
 
 	private void queueRespawn(final Material material, final Block block) {

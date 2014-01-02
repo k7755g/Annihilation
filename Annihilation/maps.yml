@@ -5,7 +5,7 @@
 
 test:
   # Spawn points for each team, can have as many entries as you like.
-  # At least one mandatory.
+  # At least one required.
   spawns:
     red:
     - "-25,65,-25"
@@ -16,13 +16,13 @@ test:
     blue:
     - "25,65,-25"
   # Nexuses for each team, only one nexus each. 
-  # Mandatory.
+  # Required.
   nexuses:
     red: "-27,66,-27"
     yellow: "-27,66,27"
     green: "27,66,27"
     blue: "27,66,-27"
-    
+  
   # Ender furnaces for each team, only one each. 
   # Optional.
   furnaces:
@@ -30,6 +30,15 @@ test:
     yellow: "-22,65,22"
     green: "22,65,22"
     blue: "22,65,-22"
+    
+  # Diamond locations, can have as many as you like.
+  # Optional, but highly recommended.
+  diamonds:
+  - "0,62,0"
+  - "1,62,1"
+  - "1,62,-1"
+  - "-1,62,-1"
+  - "-1,62,1"
     
 # The spawn location for the lobby world.
 # Mandatory.
