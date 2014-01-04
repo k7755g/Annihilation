@@ -57,9 +57,7 @@ public class TeamCommand implements CommandExecutor {
 		meta.setTeam(target);
 
 		if (plugin.getPhase() > 0) {
-			player.teleport(target.getRandomSpawn());
-			meta.getKit().give(player, target);
-			meta.setAlive(true);
+			Annihilation.Util.sendPlayerToGame(player);
 		}
 	}
 

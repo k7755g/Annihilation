@@ -13,6 +13,9 @@ import net.coasterman10.Annihilation.commands.StatsCommand;
 import net.coasterman10.Annihilation.commands.TeamCommand;
 import net.coasterman10.Annihilation.commands.UnlockCommand;
 import net.coasterman10.Annihilation.commands.VoteCommand;
+import net.coasterman10.Annihilation.listeners.ClassAbilityListener;
+import net.coasterman10.Annihilation.listeners.CraftingListener;
+import net.coasterman10.Annihilation.listeners.EnderFurnaceListener;
 import net.coasterman10.Annihilation.listeners.PlayerListener;
 import net.coasterman10.Annihilation.listeners.ResourceListener;
 import net.coasterman10.Annihilation.listeners.SoulboundListener;
@@ -26,6 +29,7 @@ import net.coasterman10.Annihilation.stats.StatsManager;
 
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -42,6 +46,7 @@ public final class Annihilation extends JavaPlugin {
 	private MapManager maps;
 	private PhaseTimer timer;
 	private ResourceListener resources;
+	private EnderFurnaceListener enderFurnaces;
 	private StatsManager stats;
 	private DatabaseHandler db;
 	public boolean useMysql = false;
@@ -60,6 +65,7 @@ public final class Annihilation extends JavaPlugin {
 
 		stats = new StatsManager(this, configManager);
 		resources = new ResourceListener(this);
+		enderFurnaces = new EnderFurnaceListener();
 
 		Configuration config = configManager.getConfig("config.yml");
 		timer = new PhaseTimer(this, config.getInt("start-delay"),
@@ -72,11 +78,14 @@ public final class Annihilation extends JavaPlugin {
 		pm.registerEvents(cl, this);
 
 		pm.registerEvents(resources, this);
+		pm.registerEvents(enderFurnaces, this);
 		pm.registerEvents(new ChatListener(this), this);
 		pm.registerEvents(new PlayerListener(this), this);
 		pm.registerEvents(new WorldListener(), this);
 		pm.registerEvents(new SoulboundListener(), this);
 		pm.registerEvents(new WandListener(this), this);
+		pm.registerEvents(new CraftingListener(), this);
+		pm.registerEvents(new ClassAbilityListener(), this);
 
 		getCommand("annihilation").setExecutor(new AnnihilationCommand(this));
 		getCommand("class").setExecutor(new ClassCommand());
@@ -127,19 +136,25 @@ public final class Annihilation extends JavaPlugin {
 			String name = team.name().toLowerCase();
 			if (section.contains("spawns." + name)) {
 				for (String s : section.getStringList("spawns." + name))
-					team.addSpawn(parseLocation(getServer().getWorld(map), s));
+					team.addSpawn(Util.parseLocation(getServer().getWorld(map), s));
 			}
 			if (section.contains("nexuses." + name)) {
-				Location loc = parseLocation(w,
+				Location loc = Util.parseLocation(w,
 						section.getString("nexuses." + name));
 				team.loadNexus(loc, 25);
+			}
+			if (section.contains("furnaces." + name)) {
+				Location loc = Util.parseLocation(w,
+						section.getString("furnaces." + name));
+				enderFurnaces.setFurnaceLocation(team, loc);
+				loc.getBlock().setType(Material.FURNACE);
 			}
 		}
 
 		if (section.contains("diamonds")) {
 			Set<Location> diamonds = new HashSet<Location>();
 			for (String s : section.getStringList("diamonds"))
-				diamonds.add(parseLocation(w, s));
+				diamonds.add(Util.parseLocation(w, s));
 			resources.loadDiamonds(diamonds);
 		}
 	}
@@ -153,13 +168,19 @@ public final class Annihilation extends JavaPlugin {
 					.getHealth());
 
 		for (Player p : getServer().getOnlinePlayers()) {
-			PlayerMeta meta = PlayerMeta.getMeta(p);
-			if (meta.getTeam() != AnnihilationTeam.NONE) {
-				meta.setAlive(true);
-				p.teleport(meta.getTeam().getRandomSpawn());
-				meta.getKit().give(p, meta.getTeam());
-			}
+			Util.sendPlayerToGame(p);
 		}
+
+		getServer().getScheduler().runTaskTimer(this, new Runnable() {
+			@Override
+			public void run() {
+				for (Player p : getServer().getOnlinePlayers()) {
+					if (PlayerMeta.getMeta(p).getKit() == Kit.SCOUT) {
+						PlayerMeta.getMeta(p).getKit().addScoutParticles(p);
+					}
+				}
+			}
+		}, 0L, 1200L);
 	}
 
 	public void advancePhase() {
@@ -213,17 +234,6 @@ public final class Annihilation extends JavaPlugin {
 		return voting;
 	}
 
-	public static boolean isEmptyColumn(Location loc) {
-		boolean hasBlock = false;
-		Location test = loc.clone();
-		for (int y = 0; y < loc.getWorld().getMaxHeight(); y++) {
-			test.setY(y);
-			if (test.getBlock().getType() != Material.AIR)
-				hasBlock = true;
-		}
-		return !hasBlock;
-	}
-
 	public void endGame(AnnihilationTeam winner) {
 		if (winner == null)
 			return;
@@ -250,7 +260,7 @@ public final class Annihilation extends JavaPlugin {
 			BarUtil.setMessageAndPercent(p, ChatColor.DARK_AQUA
 					+ "Welcome to Annihilation!", 0.01F);
 		}
-		
+
 		voting.start();
 	}
 
@@ -268,19 +278,46 @@ public final class Annihilation extends JavaPlugin {
 		}
 	}
 
-	public static Location parseLocation(World w, String in) {
-		String[] params = in.split(",");
-		if (params.length == 3 || params.length == 5) {
-			double x = Double.parseDouble(params[0]);
-			double y = Double.parseDouble(params[1]);
-			double z = Double.parseDouble(params[2]);
-			Location loc = new Location(w, x, y, z);
-			if (params.length == 5) {
-				loc.setYaw(Float.parseFloat(params[4]));
-				loc.setPitch(Float.parseFloat(params[5]));
+	public static class Util {
+		public static Location parseLocation(World w, String in) {
+			String[] params = in.split(",");
+			if (params.length == 3 || params.length == 5) {
+				double x = Double.parseDouble(params[0]);
+				double y = Double.parseDouble(params[1]);
+				double z = Double.parseDouble(params[2]);
+				Location loc = new Location(w, x, y, z);
+				if (params.length == 5) {
+					loc.setYaw(Float.parseFloat(params[4]));
+					loc.setPitch(Float.parseFloat(params[5]));
+				}
+				return loc;
 			}
-			return loc;
+			return null;
 		}
-		return null;
+
+		public static void sendPlayerToGame(Player player) {
+			PlayerMeta meta = PlayerMeta.getMeta(player);
+			if (meta.getTeam() != null) {
+				meta.setAlive(true);
+				player.teleport(meta.getTeam().getRandomSpawn());
+				meta.getKit().give(player, meta.getTeam());
+				player.setCompassTarget(meta.getTeam().getNexus().getLocation());
+				player.setGameMode(GameMode.ADVENTURE);
+				player.setHealth(player.getMaxHealth());
+				player.setFoodLevel(20);
+				player.setSaturation(20F);
+			}
+		}
+
+		public static boolean isEmptyColumn(Location loc) {
+			boolean hasBlock = false;
+			Location test = loc.clone();
+			for (int y = 0; y < loc.getWorld().getMaxHeight(); y++) {
+				test.setY(y);
+				if (test.getBlock().getType() != Material.AIR)
+					hasBlock = true;
+			}
+			return !hasBlock;
+		}
 	}
 }

@@ -28,7 +28,7 @@ public class WorldListener implements Listener {
 
 	@EventHandler
 	public void onWaterFlow(BlockFromToEvent e) {
-		if (Annihilation.isEmptyColumn(e.getToBlock().getLocation()))
+		if (Annihilation.Util.isEmptyColumn(e.getToBlock().getLocation()))
 			e.setCancelled(true);
 	}
 

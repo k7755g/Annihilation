@@ -27,8 +27,14 @@ public class ClassCommand implements CommandExecutor {
 					player.sendMessage(ChatColor.DARK_AQUA
 							+ "You are already a " + kit.getName());
 				} else if (kit != null) {
-					meta.setKit(kit);
-					player.setHealth(0.0);
+					if (kit.isOwnedBy(player)) {
+						meta.setKit(kit);
+						player.sendMessage(ChatColor.DARK_AQUA + "You selected class " + kit.getName());
+						if (meta.isAlive())
+							player.setHealth(0.0);
+					} else {
+						player.sendMessage(ChatColor.RED + "You do not own " + kit.getName());
+					}
 				} else {
 					player.sendMessage("\"" + args[0]
 							+ "\" is not a valid class.");

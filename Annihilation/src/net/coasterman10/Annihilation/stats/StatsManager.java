@@ -55,6 +55,10 @@ public class StatsManager {
 	}
 
 	public void incrementStat(StatType s, Player p) {
-		setValue(s, p, getStat(s, p) + 1);
+		incrementStat(s, p, 1);
+	}
+
+	public void incrementStat(StatType s, Player p, int amount) {
+		setValue(s, p, getStat(s, p) + amount);
 	}
 }
