@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 
+import net.coasterman10.Annihilation.api.GameStartEvent;
 import net.coasterman10.Annihilation.api.PhaseChangeEvent;
 import net.coasterman10.Annihilation.bar.BarUtil;
 import net.coasterman10.Annihilation.chat.ChatListener;
@@ -147,6 +148,8 @@ public final class Annihilation extends JavaPlugin {
 	}
 
 	public void startGame() {
+		Bukkit.getPluginManager().callEvent(new GameStartEvent(maps.getCurrentMap()));
+		
 		ScoreboardUtil.setTitle(ChatColor.GOLD + "Map: "
 				+ WordUtils.capitalize(voting.getWinner()));
 		ScoreboardUtil.removeAllScores();
