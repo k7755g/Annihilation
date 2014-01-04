@@ -63,9 +63,9 @@ public class SoulboundListener implements Listener {
 	public static void soulbind(ItemStack stack) {
 		ItemMeta meta = stack.getItemMeta();
 		if (!meta.hasLore())
-			meta.setLore(Arrays.asList(ChatColor.GOLD + "Soulbound"));
+			meta.setLore(Arrays.asList(soulboundTag));
 		else
-			meta.getLore().add(ChatColor.GOLD + "Soulbound");
+			meta.getLore().add(soulboundTag);
 		stack.setItemMeta(meta);
 	}
 }
