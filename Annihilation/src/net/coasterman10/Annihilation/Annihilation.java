@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 
+import net.coasterman10.Annihilation.api.PhaseChangeEvent;
 import net.coasterman10.Annihilation.bar.BarUtil;
 import net.coasterman10.Annihilation.chat.ChatListener;
 import net.coasterman10.Annihilation.chat.ChatUtil;
@@ -25,6 +26,7 @@ import net.coasterman10.Annihilation.stats.StatType;
 import net.coasterman10.Annihilation.stats.StatsManager;
 
 import org.apache.commons.lang.WordUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -166,6 +168,7 @@ public final class Annihilation extends JavaPlugin {
 		ChatUtil.phaseMessage(timer.getPhase());
 		if (timer.getPhase() == 3)
 			resources.spawnDiamonds();
+		Bukkit.getPluginManager().callEvent(new PhaseChangeEvent(timer.getPhase()));
 	}
 
 	public void onSecond() {
