@@ -5,6 +5,8 @@ import net.coasterman10.Annihilation.AnnihilationTeam;
 import net.coasterman10.Annihilation.Kit;
 import net.coasterman10.Annihilation.PlayerMeta;
 import net.coasterman10.Annihilation.ScoreboardUtil;
+import net.coasterman10.Annihilation.api.NexusDamageEvent;
+import net.coasterman10.Annihilation.api.NexusDestroyEvent;
 import net.coasterman10.Annihilation.bar.BarUtil;
 import net.coasterman10.Annihilation.chat.ChatUtil;
 import net.coasterman10.Annihilation.stats.StatType;
@@ -210,8 +212,11 @@ public class PlayerListener implements Listener {
 			ScoreboardUtil.setScore(victim.coloredName() + " Nexus", victim
 					.getNexus().getHealth());
 
+			Bukkit.getServer().getPluginManager().callEvent(new NexusDamageEvent(breaker, victim, victim.getNexus().getHealth()));
+			
 			if (victim.getNexus().getHealth() == 0) {
 				ScoreboardUtil.removeScore(victim.coloredName() + " Nexus");
+				Bukkit.getServer().getPluginManager().callEvent(new NexusDestroyEvent(breaker, victim));
 				ChatUtil.nexusDestroyed(attacker, victim);
 				plugin.checkWin();
 				for (Player p : victim.getPlayers())
