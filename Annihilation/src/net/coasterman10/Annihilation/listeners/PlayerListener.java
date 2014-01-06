@@ -111,13 +111,9 @@ public class PlayerListener implements Listener {
 		plugin.getStatsManager().setValue(StatType.DEATHS, p,
 				plugin.getStatsManager().getStat(StatType.DEATHS, p) + 1);
 
-		if (p.getKiller() != null) {
+		if (p.getKiller() != null && !p.getKiller().equals(p)) {
 			Player killer = p.getKiller();
-			plugin.getStatsManager().setValue(
-					StatType.KILLS,
-					killer,
-					plugin.getStatsManager().getStat(StatType.DEATHS,
-							p.getKiller()) + 1);
+			plugin.getStatsManager().incrementStat(StatType.KILLS, killer);
 			e.setDeathMessage(ChatUtil.formatDeathMessage(p, p.getKiller(),
 					e.getDeathMessage()));
 

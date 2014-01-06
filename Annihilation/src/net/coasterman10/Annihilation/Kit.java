@@ -88,6 +88,17 @@ public enum Kit {
 			spawnItems.add(new ItemStack(Material.STONE_AXE));
 			spawnItems.get(2).addEnchantment(Enchantment.DIG_SPEED, 1);
 		}
+	},
+	OPERATIVE {
+		{
+			spawnItems.add(new ItemStack(Material.WOOD_SWORD));
+			spawnItems.add(new ItemStack(Material.WOOD_PICKAXE));
+			spawnItems.add(new ItemStack(Material.WOOD_AXE));
+			spawnItems.add(new ItemStack(Material.SOUL_SAND));
+			ItemMeta meta = spawnItems.get(3).getItemMeta();
+			meta.setDisplayName(ChatColor.AQUA + "Return Point");
+			spawnItems.get(3).setItemMeta(meta);
+		}
 	};
 
 	List<ItemStack> spawnItems = new ArrayList<ItemStack>();
@@ -96,7 +107,6 @@ public enum Kit {
 			new ItemStack(Material.LEATHER_LEGGINGS),
 			new ItemStack(Material.LEATHER_CHESTPLATE),
 			new ItemStack(Material.LEATHER_HELMET) };
-
 
 	public static Kit getKit(String name) {
 		for (Kit type : values()) {

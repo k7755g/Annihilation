@@ -88,7 +88,7 @@ public final class Annihilation extends JavaPlugin {
 		pm.registerEvents(new SoulboundListener(), this);
 		pm.registerEvents(new WandListener(this), this);
 		pm.registerEvents(new CraftingListener(), this);
-		pm.registerEvents(new ClassAbilityListener(), this);
+		pm.registerEvents(new ClassAbilityListener(this), this);
 
 		getCommand("annihilation").setExecutor(new AnnihilationCommand(this));
 		getCommand("class").setExecutor(new ClassCommand());
