@@ -15,11 +15,13 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerFishEvent;
 import org.bukkit.event.player.PlayerFishEvent.State;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 
 public class ClassAbilityListener implements Listener {
@@ -39,30 +41,41 @@ public class ClassAbilityListener implements Listener {
 
 	@SuppressWarnings("deprecation")
 	@EventHandler
-	public void onSpecialBlockPlace(BlockPlaceEvent e) {
+	public void onSpecialBlockPlace(PlayerInteractEvent e) {
+		if (e.getAction() != Action.RIGHT_CLICK_BLOCK)
+			return;
+		
 		Player player = e.getPlayer();
 		Kit kit = PlayerMeta.getMeta(player).getKit();
 
 		if (kit == Kit.OPERATIVE) {
-			final Block placed = e.getBlock();
-			if (placed.getType() == Material.SOUL_SAND) {
-				e.setCancelled(true);
-				if (blockLocations.get(player.getName()) == null) {
-					player.updateInventory();
-					blockLocations.put(player.getName(), placed.getLocation());
-					cooldowns.put(player.getName(), 90L);
-					player.sendMessage(ChatColor.AQUA
-							+ "You will be teleported back here in 90 seconds");
-					Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
-						@Override
-						public void run() {
-							placed.setType(Material.SOUL_SAND);
-						}
-					}, 1L);
-				} else {
-					player.sendMessage(ChatColor.RED
-							+ "You have already placed a return point; you will return in "
-							+ cooldowns.get(player.getName()) + " seconds");
+			final Block placed = e.getClickedBlock().getRelative(
+					e.getBlockFace());
+			ItemStack held = player.getItemInHand();
+			if (held.hasItemMeta()) {
+				if (held.getType() == Material.SOUL_SAND
+						&& held.getItemMeta().getDisplayName()
+								.equals(ChatColor.AQUA + "Return Point")) {
+					e.setCancelled(true);
+					if (blockLocations.get(player.getName()) == null) {
+						player.updateInventory();
+						blockLocations.put(player.getName(),
+								placed.getLocation());
+						cooldowns.put(player.getName(), 90L);
+						player.sendMessage(ChatColor.AQUA
+								+ "You will be teleported back here in 90 seconds");
+						Bukkit.getScheduler().runTaskLater(plugin,
+								new Runnable() {
+									@Override
+									public void run() {
+										placed.setType(Material.SOUL_SAND);
+									}
+								}, 1L);
+					} else {
+						player.sendMessage(ChatColor.RED
+								+ "You have already placed a return point; you will return in "
+								+ cooldowns.get(player.getName()) + " seconds");
+					}
 				}
 			}
 		}
