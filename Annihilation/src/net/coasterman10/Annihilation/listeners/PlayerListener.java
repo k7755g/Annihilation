@@ -208,15 +208,22 @@ public class PlayerListener implements Listener {
 			ScoreboardUtil.setScore(victim.coloredName() + " Nexus", victim
 					.getNexus().getHealth());
 
-			Bukkit.getServer().getPluginManager().callEvent(new NexusDamageEvent(breaker, victim, victim.getNexus().getHealth()));
-			
+			Bukkit.getServer()
+					.getPluginManager()
+					.callEvent(
+							new NexusDamageEvent(breaker, victim, victim
+									.getNexus().getHealth()));
+
 			if (victim.getNexus().getHealth() == 0) {
 				ScoreboardUtil.removeScore(victim.coloredName() + " Nexus");
-				Bukkit.getServer().getPluginManager().callEvent(new NexusDestroyEvent(breaker, victim));
+				Bukkit.getServer().getPluginManager()
+						.callEvent(new NexusDestroyEvent(breaker, victim));
 				ChatUtil.nexusDestroyed(attacker, victim);
 				plugin.checkWin();
-				for (Player p : victim.getPlayers())
+				for (Player p : victim.getPlayers()) {
 					plugin.getStatsManager().incrementStat(StatType.LOSSES, p);
+					PlayerMeta.getMeta(p).setAlive(false);
+				}
 			}
 		}
 	}

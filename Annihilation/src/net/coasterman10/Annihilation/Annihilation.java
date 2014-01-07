@@ -13,7 +13,6 @@ import net.coasterman10.Annihilation.commands.AnnihilationCommand;
 import net.coasterman10.Annihilation.commands.ClassCommand;
 import net.coasterman10.Annihilation.commands.StatsCommand;
 import net.coasterman10.Annihilation.commands.TeamCommand;
-import net.coasterman10.Annihilation.commands.UnlockCommand;
 import net.coasterman10.Annihilation.commands.VoteCommand;
 import net.coasterman10.Annihilation.listeners.ClassAbilityListener;
 import net.coasterman10.Annihilation.listeners.CraftingListener;
@@ -77,9 +76,6 @@ public final class Annihilation extends JavaPlugin {
 
 		PluginManager pm = getServer().getPluginManager();
 
-		ChestLocker cl = new ChestLocker();
-		pm.registerEvents(cl, this);
-
 		pm.registerEvents(resources, this);
 		pm.registerEvents(enderFurnaces, this);
 		pm.registerEvents(new ChatListener(this), this);
@@ -94,7 +90,6 @@ public final class Annihilation extends JavaPlugin {
 		getCommand("class").setExecutor(new ClassCommand());
 		getCommand("stats").setExecutor(new StatsCommand(stats));
 		getCommand("team").setExecutor(new TeamCommand(this));
-		getCommand("unlock").setExecutor(new UnlockCommand(cl));
 		getCommand("vote").setExecutor(new VoteCommand(voting));
 
 		BarUtil.init(this);

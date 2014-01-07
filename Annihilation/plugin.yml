@@ -9,9 +9,6 @@ commands:
   team:
     description: Team command for Annihilation
     aliases: t
-  unlock:
-    description: Unlocks your locked chest
-    aliases: ul
   vote:
     description: Places vote for a map
     aliases: v
