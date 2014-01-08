@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 
+import net.coasterman10.Annihilation.Updater.UpdateResult;
 import net.coasterman10.Annihilation.api.GameStartEvent;
 import net.coasterman10.Annihilation.api.PhaseChangeEvent;
 import net.coasterman10.Annihilation.bar.BarUtil;
@@ -56,9 +57,27 @@ public final class Annihilation extends JavaPlugin {
 	private SignHandler sign;
 	private DatabaseHandler db;
 	public boolean useMysql = false;
-
+	public boolean updateAvailable = false;
+	public String newVersion;
+	
 	@Override
 	public void onEnable() {
+		 UpdateResult updateResult = null;
+         Updater u = null;
+         
+         if (this.getConfig().getBoolean("autoUpdater"))
+                 u = new Updater(this, 00000, this.getFile(), Updater.UpdateType.DEFAULT, true);
+ 
+         if (u != null)
+                 updateResult = u.getResult();
+         
+         if (updateResult != null) {
+                 if (updateResult == UpdateResult.SUCCESS) {
+                         updateAvailable = true;
+                         newVersion = u.getLatestName();
+                 }
+         }
+		
 		configManager = new ConfigManager(this);
 		configManager.loadConfigFiles("config.yml", "maps.yml", "shops.yml",
 				"stats.yml");
