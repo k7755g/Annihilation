@@ -16,6 +16,7 @@ import net.coasterman10.Annihilation.commands.TeamCommand;
 import net.coasterman10.Annihilation.commands.VoteCommand;
 import net.coasterman10.Annihilation.listeners.ClassAbilityListener;
 import net.coasterman10.Annihilation.listeners.CraftingListener;
+import net.coasterman10.Annihilation.listeners.EnderChestListener;
 import net.coasterman10.Annihilation.listeners.EnderFurnaceListener;
 import net.coasterman10.Annihilation.listeners.PlayerListener;
 import net.coasterman10.Annihilation.listeners.ResourceListener;
@@ -49,6 +50,7 @@ public final class Annihilation extends JavaPlugin {
 	private PhaseTimer timer;
 	private ResourceListener resources;
 	private EnderFurnaceListener enderFurnaces;
+	private EnderChestListener enderChests;
 	private StatsManager stats;
 	private DatabaseHandler db;
 	public boolean useMysql = false;
@@ -68,6 +70,7 @@ public final class Annihilation extends JavaPlugin {
 		stats = new StatsManager(this, configManager);
 		resources = new ResourceListener(this);
 		enderFurnaces = new EnderFurnaceListener();
+		enderChests = new EnderChestListener();
 
 		Configuration config = configManager.getConfig("config.yml");
 		timer = new PhaseTimer(this, config.getInt("start-delay"),
@@ -78,6 +81,7 @@ public final class Annihilation extends JavaPlugin {
 
 		pm.registerEvents(resources, this);
 		pm.registerEvents(enderFurnaces, this);
+		pm.registerEvents(enderChests, this);
 		pm.registerEvents(new ChatListener(this), this);
 		pm.registerEvents(new PlayerListener(this), this);
 		pm.registerEvents(new WorldListener(), this);
@@ -146,6 +150,11 @@ public final class Annihilation extends JavaPlugin {
 						section.getString("furnaces." + name));
 				enderFurnaces.setFurnaceLocation(team, loc);
 				loc.getBlock().setType(Material.FURNACE);
+			}
+			if (section.contains("enderchests." + name)) {
+				Location loc = Util.parseLocation(w, section.getString("enderchests." + name));
+				enderChests.setEnderChestLocation(team, loc);
+				loc.getBlock().setType(Material.ENDER_CHEST);
 			}
 		}
 
