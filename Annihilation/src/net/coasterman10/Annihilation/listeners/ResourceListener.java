@@ -9,6 +9,7 @@ import net.coasterman10.Annihilation.Annihilation;
 import net.coasterman10.Annihilation.Kit;
 import net.coasterman10.Annihilation.PlayerMeta;
 
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -54,11 +55,13 @@ public class ResourceListener implements Listener {
 		addResource(Material.MELON_BLOCK, 0, 10);
 	}
 
+	@SuppressWarnings("deprecation")
 	@EventHandler(ignoreCancelled = false)
 	public void onResourceBreak(BlockBreakEvent e) {
 		if (resources.containsKey(e.getBlock().getType())) {
 			e.setCancelled(true);
 			breakResource(e.getPlayer(), e.getBlock());
+			e.getBlock().getWorld().playEffect(e.getBlock().getLocation(), Effect.STEP_SOUND, e.getBlock().getTypeId());
 		} else if (queue.contains(e.getBlock().getLocation())) {
 			e.setCancelled(true);
 		}
@@ -117,10 +120,12 @@ public class ResourceListener implements Listener {
 		block.setType(getRespawnMaterial(type));
 		queue.add(block.getLocation());
 		plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
+			@SuppressWarnings("deprecation")
 			@Override
 			public void run() {
 				block.setType(type);
 				queue.remove(block.getLocation());
+				block.getWorld().playEffect(block.getLocation(), Effect.STEP_SOUND, block.getTypeId());
 			}
 		}, resources.get(type).delay * 20L);
 	}

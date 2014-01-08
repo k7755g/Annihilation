@@ -40,6 +40,7 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -52,6 +53,7 @@ public final class Annihilation extends JavaPlugin {
 	private EnderFurnaceListener enderFurnaces;
 	private EnderChestListener enderChests;
 	private StatsManager stats;
+	private SignHandler sign;
 	private DatabaseHandler db;
 	public boolean useMysql = false;
 
@@ -71,13 +73,15 @@ public final class Annihilation extends JavaPlugin {
 		resources = new ResourceListener(this);
 		enderFurnaces = new EnderFurnaceListener();
 		enderChests = new EnderChestListener();
-
+		sign = new SignHandler(this);
 		Configuration config = configManager.getConfig("config.yml");
 		timer = new PhaseTimer(this, config.getInt("start-delay"),
 				config.getInt("phase-period"));
 		voting = new VotingManager(this);
 
 		PluginManager pm = getServer().getPluginManager();
+
+		sign.loadSigns();
 
 		pm.registerEvents(resources, this);
 		pm.registerEvents(enderFurnaces, this);
@@ -116,7 +120,12 @@ public final class Annihilation extends JavaPlugin {
 		} else
 			db = new DatabaseHandler(this);
 
+		for (AnnihilationTeam team : AnnihilationTeam.teams())
+			ScoreboardUtil.registerTeam(team.name(), team.color());
+
 		reset();
+
+		ChatUtil.setRoman(getConfig().getBoolean("roman", false));
 	}
 
 	public boolean startTimer() {
@@ -138,12 +147,13 @@ public final class Annihilation extends JavaPlugin {
 			String name = team.name().toLowerCase();
 			if (section.contains("spawns." + name)) {
 				for (String s : section.getStringList("spawns." + name))
-					team.addSpawn(Util.parseLocation(getServer().getWorld(map), s));
+					team.addSpawn(Util.parseLocation(getServer().getWorld(map),
+							s));
 			}
 			if (section.contains("nexuses." + name)) {
 				Location loc = Util.parseLocation(w,
 						section.getString("nexuses." + name));
-				team.loadNexus(loc, 25);
+				team.loadNexus(loc, 75);
 			}
 			if (section.contains("furnaces." + name)) {
 				Location loc = Util.parseLocation(w,
@@ -152,7 +162,8 @@ public final class Annihilation extends JavaPlugin {
 				loc.getBlock().setType(Material.FURNACE);
 			}
 			if (section.contains("enderchests." + name)) {
-				Location loc = Util.parseLocation(w, section.getString("enderchests." + name));
+				Location loc = Util.parseLocation(w,
+						section.getString("enderchests." + name));
 				enderChests.setEnderChestLocation(team, loc);
 				loc.getBlock().setType(Material.ENDER_CHEST);
 			}
@@ -167,8 +178,9 @@ public final class Annihilation extends JavaPlugin {
 	}
 
 	public void startGame() {
-		Bukkit.getPluginManager().callEvent(new GameStartEvent(maps.getCurrentMap()));
-		
+		Bukkit.getPluginManager().callEvent(
+				new GameStartEvent(maps.getCurrentMap()));
+
 		ScoreboardUtil.setTitle(ChatColor.GOLD + "Map: "
 				+ WordUtils.capitalize(voting.getWinner()));
 		ScoreboardUtil.removeAllScores();
@@ -196,7 +208,13 @@ public final class Annihilation extends JavaPlugin {
 		ChatUtil.phaseMessage(timer.getPhase());
 		if (timer.getPhase() == 3)
 			resources.spawnDiamonds();
-		Bukkit.getPluginManager().callEvent(new PhaseChangeEvent(timer.getPhase()));
+		Bukkit.getPluginManager().callEvent(
+				new PhaseChangeEvent(timer.getPhase()));
+
+		getSignHandler().updateSigns(AnnihilationTeam.RED);
+		getSignHandler().updateSigns(AnnihilationTeam.BLUE);
+		getSignHandler().updateSigns(AnnihilationTeam.GREEN);
+		getSignHandler().updateSigns(AnnihilationTeam.YELLOW);
 	}
 
 	public void onSecond() {
@@ -232,6 +250,10 @@ public final class Annihilation extends JavaPlugin {
 		return db;
 	}
 
+	public ConfigManager getConfigManager() {
+		return configManager;
+	}
+
 	public int getPhaseDelay() {
 		return configManager.getConfig("config.yml").getInt("phase-period");
 	}
@@ -259,16 +281,25 @@ public final class Annihilation extends JavaPlugin {
 		new RestartTimer(this, restartDelay).start(timer.getTime());
 	}
 
+	@SuppressWarnings("deprecation")
 	public void reset() {
 		ScoreboardUtil.showForPlayers(getServer().getOnlinePlayers());
 		maps.reset();
 		timer.reset();
 		for (Player p : getServer().getOnlinePlayers()) {
 			PlayerMeta.getMeta(p).setTeam(AnnihilationTeam.NONE);
-			p.getInventory().clear();
+			PlayerInventory inv = p.getInventory();
+			inv.setHelmet(null);	
+			inv.setChestplate(null);
+			inv.setLeggings(null);
+			inv.setBoots(null);
+			p.updateInventory();
 			p.teleport(maps.getLobbySpawnPoint());
 			BarUtil.setMessageAndPercent(p, ChatColor.DARK_AQUA
 					+ "Welcome to Annihilation!", 0.01F);
+			p.setHealth(20D);
+			p.setFoodLevel(20);
+			p.setSaturation(20F);
 		}
 
 		voting.start();
@@ -286,6 +317,14 @@ public final class Annihilation extends JavaPlugin {
 		if (alive == 1) {
 			endGame(aliveTeam);
 		}
+	}
+
+	public SignHandler getSignHandler() {
+		return sign;
+	}
+
+	public void setSignHandler(SignHandler sign) {
+		this.sign = sign;
 	}
 
 	public static class Util {

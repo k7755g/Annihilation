@@ -37,14 +37,16 @@ public class ScoreboardUtil {
 	public static void setTitle(String title) {
 		objective.setDisplayName(title);
 		if (DEBUG)
-			Bukkit.getLogger().info("Set scoreboard title to \"" + title + "\"");
+			Bukkit.getLogger()
+					.info("Set scoreboard title to \"" + title + "\"");
 	}
 
 	public static void setScore(String name, int score) {
 		stats.add(name);
 		objective.getScore(Bukkit.getOfflinePlayer(name)).setScore(score);
 		if (DEBUG)
-			Bukkit.getLogger().info("Set score for \"" + name + "\" to " + score + "");
+			Bukkit.getLogger().info(
+					"Set score for \"" + name + "\" to " + score + "");
 	}
 
 	public static void removeAllScores() {
@@ -63,10 +65,20 @@ public class ScoreboardUtil {
 		Team t = board.registerNewTeam(name);
 		t.setAllowFriendlyFire(false);
 		t.setPrefix(color.toString());
+		if (DEBUG)
+			Bukkit.getLogger().info(
+					"Registered team " + name + " with color " + color.name());
 	}
 
 	public static void addPlayerToTeam(Player p, String team) {
-		if (board.getTeam(team) != null)
-			board.getTeam(team).addPlayer(p);
+		if (board.getTeam(team) != null) {
+			board.getTeam(team).addPlayer(Bukkit.getOfflinePlayer(p.getName()));
+			if (DEBUG)
+				Bukkit.getLogger().info(
+						"Added player " + p.getName() + " to team " + team);
+		} else if (DEBUG)
+			Bukkit.getLogger().info(
+					"Tried to add player " + p.getName() + " to team " + team
+							+ " but board team is null");
 	}
 }

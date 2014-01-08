@@ -31,6 +31,14 @@ test:
     green: "22,65,22"
     blue: "22,65,-22"
     
+  # Ender chests for each team, only one each.
+  # Optional.
+  enderchests:
+    red: "-21,65,-21"
+    yellow: "-21,65,21"
+    green: "21,65,21"
+    blue: "21,65,-21"
+    
   # Diamond locations, can have as many as you like.
   # Optional, but highly recommended.
   diamonds:
@@ -44,3 +52,19 @@ test:
 # Mandatory.
 lobby:
   spawn: "0,64,0"
+  
+  # Team join sign locations.
+  # Optional.
+  signs:
+    red:
+    - "-4,65,-3"
+    - "-3,65,-4"
+    yellow:
+    - "-4,65,3"
+    - "-3,65,4"
+    green:
+    - "4,65,3"
+    - "3,65,4"
+    blue:
+    - "4,65,-3"
+    - "3,65,-4"

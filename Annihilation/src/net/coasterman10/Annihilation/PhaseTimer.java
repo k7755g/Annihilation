@@ -43,6 +43,11 @@ public class PhaseTimer {
 		for (Player p : Bukkit.getOnlinePlayers())
 			BarUtil.setMessageAndPercent(p, ChatColor.GREEN + "Starting in "
 					+ -time, 1F);
+		
+		plugin.getSignHandler().updateSigns(AnnihilationTeam.RED);
+		plugin.getSignHandler().updateSigns(AnnihilationTeam.BLUE);
+		plugin.getSignHandler().updateSigns(AnnihilationTeam.GREEN);
+		plugin.getSignHandler().updateSigns(AnnihilationTeam.YELLOW);
 	}
 
 	public void stop() {
@@ -99,8 +104,13 @@ public class PhaseTimer {
 				percent = 1F;
 			else
 				percent = (float) getRemainingPhaseTime() / (float) phaseTime;
-			text = getPhaseColor() + "Phase " + ChatUtil.translateRoman(phase) + ChatColor.WHITE + " | "
+			text = getPhaseColor() + "Phase " + ChatUtil.translateRoman(phase) + ChatColor.DARK_GRAY + " | "
 					+ timeString(time);
+			
+			plugin.getSignHandler().updateSigns(AnnihilationTeam.RED);
+			plugin.getSignHandler().updateSigns(AnnihilationTeam.BLUE);
+			plugin.getSignHandler().updateSigns(AnnihilationTeam.GREEN);
+			plugin.getSignHandler().updateSigns(AnnihilationTeam.YELLOW);
 		}
 
 		for (Player p : Bukkit.getOnlinePlayers())

@@ -16,3 +16,6 @@ MySQL:
     pass: mc_
     host: localhost
     name: mc_
+    
+# Display Roman Numerals for phase numbers
+roman: true

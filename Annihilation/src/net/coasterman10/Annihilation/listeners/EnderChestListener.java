@@ -18,6 +18,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 public class EnderChestListener implements Listener {
 	private HashMap<AnnihilationTeam, Location> chests = new HashMap<AnnihilationTeam, Location>();
@@ -70,8 +71,11 @@ public class EnderChestListener implements Listener {
 		if (inventories == 0)
 			return;
 		Inventory view = Bukkit.createInventory(null, inventories * 9);
-		for (Inventory inv : shuffledInventories.subList(0, inventories))
-			view.addItem(inv.getContents());
+		for (Inventory inv : shuffledInventories.subList(0, inventories)) {
+			for (ItemStack stack : inv.getContents())
+				if (stack != null)
+					view.addItem(stack);
+		}
 		player.openInventory(view);
 	}
 

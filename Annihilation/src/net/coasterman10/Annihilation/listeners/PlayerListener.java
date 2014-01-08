@@ -14,6 +14,7 @@ import net.coasterman10.Annihilation.stats.StatType;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,7 +23,9 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -40,6 +43,7 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onInteract(PlayerInteractEvent e) {
 		Player player = e.getPlayer();
+		PlayerMeta pmeta = PlayerMeta.getMeta(player);
 		Action a = e.getAction();
 		if (a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK) {
 			ItemStack handItem = player.getItemInHand();
@@ -61,6 +65,35 @@ public class PlayerListener implements Listener {
 						if (handItem.getItemMeta().getDisplayName()
 								.contains(team.toString()))
 							setToNext = true;
+					}
+				}
+			}
+		}
+
+		if (e.getClickedBlock() != null) {
+			Material clickedType = e.getClickedBlock().getType();
+			if (clickedType == Material.SIGN_POST
+					|| clickedType == Material.WALL_SIGN) {
+				Sign s = (Sign) e.getClickedBlock().getState();
+				if (s.getLine(0).contains(ChatColor.DARK_PURPLE + "[Team]")) {
+					String teamName = ChatColor.stripColor(s.getLine(1));
+					AnnihilationTeam team = AnnihilationTeam.valueOf(teamName
+							.toUpperCase());
+					if (team != null) {
+						if (pmeta.getTeam() == AnnihilationTeam.NONE) {
+							pmeta.setTeam(team);
+							ScoreboardUtil.addPlayerToTeam(player, team.name());
+							player.sendMessage(ChatColor.DARK_AQUA
+									+ "You joined " + team.coloredName());
+							if (plugin.getPhase() > 0)
+								Annihilation.Util.sendPlayerToGame(player);
+						} else {
+							player.sendMessage(ChatColor.DARK_AQUA
+									+ "You are already on "
+									+ pmeta.getTeam().coloredName());
+						}
+
+						plugin.getSignHandler().updateSigns(team);
 					}
 				}
 			}
@@ -102,11 +135,19 @@ public class PlayerListener implements Listener {
 		} else {
 			ScoreboardUtil.showForPlayers(player);
 		}
+
+		plugin.getSignHandler().updateSigns(meta.getTeam());
 	}
 
 	@EventHandler
 	public void onPlayerDeath(PlayerDeathEvent e) {
 		Player p = e.getEntity();
+
+		if (plugin.getPhase() > 0) {
+			PlayerMeta meta = PlayerMeta.getMeta(p);
+			if (!meta.getTeam().getNexus().isAlive())
+				meta.setAlive(false);
+		}
 
 		plugin.getStatsManager().setValue(StatType.DEATHS, p,
 				plugin.getStatsManager().getStat(StatType.DEATHS, p) + 1);
@@ -127,9 +168,30 @@ public class PlayerListener implements Listener {
 	}
 
 	@EventHandler
+	public void onPlayerDamage(EntityDamageEvent e) {
+		if (e.getEntity() instanceof Player) {
+			if (e.getEntity().getWorld().getName().equals("lobby"))
+				e.setCancelled(true);
+
+			if (e.getCause() == DamageCause.VOID)
+				e.getEntity().teleport(
+						plugin.getMapManager().getLobbySpawnPoint());
+		}
+	}
+
+	@EventHandler
 	public void onPlayerAttack(EntityDamageByEntityEvent e) {
 		Entity damager = e.getDamager();
 		if (damager instanceof Player) {
+			if (damager.getWorld().getName().equals("lobby")) {
+				e.setCancelled(true);
+				return;
+			}
+			if (plugin.getPhase() < 1) {
+				e.setCancelled(true);
+				return;
+			}
+
 			Player attacker = (Player) damager;
 			if (PlayerMeta.getMeta(attacker).getKit() == Kit.WARRIOR) {
 				ItemStack hand = attacker.getItemInHand();
@@ -205,8 +267,8 @@ public class PlayerListener implements Listener {
 			for (Player p : attacker.getPlayers())
 				p.sendMessage(msg);
 
-			ScoreboardUtil.setScore(victim.coloredName() + " Nexus", victim
-					.getNexus().getHealth());
+			ScoreboardUtil.setScore(victim + " Nexus", victim.getNexus()
+					.getHealth());
 
 			Bukkit.getServer()
 					.getPluginManager()
@@ -222,9 +284,10 @@ public class PlayerListener implements Listener {
 				plugin.checkWin();
 				for (Player p : victim.getPlayers()) {
 					plugin.getStatsManager().incrementStat(StatType.LOSSES, p);
-					PlayerMeta.getMeta(p).setAlive(false);
 				}
 			}
+
+			plugin.getSignHandler().updateSigns(victim);
 		}
 	}
 }

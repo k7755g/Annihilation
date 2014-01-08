@@ -35,7 +35,7 @@ public enum Kit {
 			spawnItems.add(new ItemStack(Material.WOOD_AXE));
 			spawnItems.add(new Potion(PotionType.INSTANT_HEAL, 1)
 					.toItemStack(1));
-			spawnItems.get(0).addEnchantment(Enchantment.KNOCKBACK, 1);
+			spawnItems.get(0).addEnchantment(Enchantment.KNOCKBACK, 1);		
 		}
 	},
 	ARCHER {

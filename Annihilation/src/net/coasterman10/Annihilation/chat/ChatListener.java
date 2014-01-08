@@ -29,7 +29,7 @@ public class ChatListener implements Listener {
 		String group;
 		String message = e.getMessage();
 
-		if (team == null) {
+		if (team == AnnihilationTeam.NONE) {
 			String color = ChatColor.DARK_PURPLE.toString();
 			group = DARK_GRAY + "[" + color + "Lobby" + DARK_GRAY + "]";
 
@@ -46,13 +46,18 @@ public class ChatListener implements Listener {
 				e.getRecipients().clear();
 				e.getRecipients().addAll(team.getPlayers());
 			}
+			if (!PlayerMeta.getMeta(e.getPlayer()).isAlive()
+					&& plugin.getPhase() > 0) {
+				group = group + GRAY + " [" + ChatColor.DARK_RED + "DEAD" + GRAY
+						+ "]";
+			}
 		}
 
 		e.setFormat(group + " " + WHITE + username + WHITE + ": " + message);
 
 		if (message.contains("NEXUS")) {
 			e.setCancelled(true);
-			
+
 			plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
 				public void run() {
 					Player player = e.getPlayer();
@@ -60,7 +65,7 @@ public class ChatListener implements Listener {
 							e.getPlayer().getLocation());
 					player.sendMessage(ChatColor.DARK_RED
 							+ "Instead of shouting at your team, why don't you go defend?");
-					
+
 				}
 			});
 		}

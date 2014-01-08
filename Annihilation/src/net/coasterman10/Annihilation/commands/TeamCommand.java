@@ -3,6 +3,7 @@ package net.coasterman10.Annihilation.commands;
 import net.coasterman10.Annihilation.Annihilation;
 import net.coasterman10.Annihilation.AnnihilationTeam;
 import net.coasterman10.Annihilation.PlayerMeta;
+import net.coasterman10.Annihilation.ScoreboardUtil;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -56,9 +57,16 @@ public class TeamCommand implements CommandExecutor {
 				+ target.coloredName());
 		meta.setTeam(target);
 
+		ScoreboardUtil.addPlayerToTeam(player, target.name());
+		
 		if (plugin.getPhase() > 0) {
 			Annihilation.Util.sendPlayerToGame(player);
 		}
+		
+		plugin.getSignHandler().updateSigns(AnnihilationTeam.RED);
+		plugin.getSignHandler().updateSigns(AnnihilationTeam.BLUE);
+		plugin.getSignHandler().updateSigns(AnnihilationTeam.GREEN);
+		plugin.getSignHandler().updateSigns(AnnihilationTeam.YELLOW);
 	}
 
 	private void listTeams(CommandSender sender) {
