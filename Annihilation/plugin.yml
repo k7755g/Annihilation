@@ -16,3 +16,11 @@ commands:
     description: Lists your stats
   class:
     description: Selects your kit
+  blue:
+    description: Join the Blue team!
+  green:
+    description: Join the Green team!
+  yellow:
+    description: Join the Yellow team!
+  red:
+    description: Join the Red team!

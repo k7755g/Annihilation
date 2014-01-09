@@ -22,14 +22,15 @@ public class AnnihilationCommand implements CommandExecutor {
 		String gray = ChatColor.GRAY.toString();
 		String red = ChatColor.RED.toString();
 		String gold = ChatColor.GOLD.toString();
+		String dgray = ChatColor.DARK_GRAY.toString();
 		String prefix = cyan + "[Annihilation] " + gray;
 		
 		if (args.length == 0) {
 			sender.sendMessage(prefix + white + "Annihilation v" + plugin.getDescription().getVersion() + " by coasterman10 & stuntguy3000.");
 			sender.sendMessage(prefix + gold + "Download Annihilation at §ehttp://dev.bukkit.org/bukkit-plugins/anni/");
 			sender.sendMessage(prefix + gray + "Command Help:");
-			sender.sendMessage(prefix + gray + "/anni - Show plugin information");
-			sender.sendMessage(prefix + gray + "/anni start- Begin the game");
+			sender.sendMessage(prefix + gray + "/anni " + dgray + "-" + white + " Show plugin information.");
+			sender.sendMessage(prefix + gray + "/anni start " + dgray + "-" + white + " Begin the game.");
 		}
 		
 		if (args.length == 1) {

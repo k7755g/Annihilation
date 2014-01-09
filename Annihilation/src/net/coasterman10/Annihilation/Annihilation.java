@@ -15,6 +15,7 @@ import net.coasterman10.Annihilation.commands.AnnihilationCommand;
 import net.coasterman10.Annihilation.commands.ClassCommand;
 import net.coasterman10.Annihilation.commands.StatsCommand;
 import net.coasterman10.Annihilation.commands.TeamCommand;
+import net.coasterman10.Annihilation.commands.TeamShortcutCommand;
 import net.coasterman10.Annihilation.commands.VoteCommand;
 import net.coasterman10.Annihilation.listeners.ClassAbilityListener;
 import net.coasterman10.Annihilation.listeners.CraftingListener;
@@ -138,6 +139,10 @@ public final class Annihilation extends JavaPlugin {
 		getCommand("stats").setExecutor(new StatsCommand(stats));
 		getCommand("team").setExecutor(new TeamCommand(this));
 		getCommand("vote").setExecutor(new VoteCommand(voting));
+		getCommand("red").setExecutor(new TeamShortcutCommand(this));
+		getCommand("green").setExecutor(new TeamShortcutCommand(this));
+		getCommand("yellow").setExecutor(new TeamShortcutCommand(this));
+		getCommand("blue").setExecutor(new TeamShortcutCommand(this));
 
 		BarUtil.init(this);
 
