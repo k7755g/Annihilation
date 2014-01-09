@@ -2,6 +2,7 @@ package net.coasterman10.Annihilation.commands;
 
 import net.coasterman10.Annihilation.Annihilation;
 
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -16,25 +17,30 @@ public class AnnihilationCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label,
 			String[] args) {
-		String prefix = "§3[Annihilation] §7";
+		String cyan = ChatColor.DARK_AQUA.toString();
+		String white = ChatColor.WHITE.toString();
+		String gray = ChatColor.GRAY.toString();
+		String red = ChatColor.RED.toString();
+		String gold = ChatColor.GOLD.toString();
+		String prefix = cyan + "[Annihilation] " + gray;
 		
 		if (args.length == 0) {
-			sender.sendMessage(prefix + "§fAnnihilation v" + plugin.getDescription().getVersion() + " by coasterman10 & stuntguy3000.");
-			sender.sendMessage(prefix + "§6Download Annihilation at §ehttp://dev.bukkit.org/bukkit-plugins/anni/");
-			sender.sendMessage(prefix + "§7Command Help:");
-			sender.sendMessage(prefix + "§7/anni §8- §7Show plugin information");
-			sender.sendMessage(prefix + "§7/anni start§8- §7Begin the game");
+			sender.sendMessage(prefix + white + "Annihilation v" + plugin.getDescription().getVersion() + " by coasterman10 & stuntguy3000.");
+			sender.sendMessage(prefix + gold + "Download Annihilation at §ehttp://dev.bukkit.org/bukkit-plugins/anni/");
+			sender.sendMessage(prefix + gray + "Command Help:");
+			sender.sendMessage(prefix + gray + "/anni - Show plugin information");
+			sender.sendMessage(prefix + gray + "/anni start- Begin the game");
 		}
 		
 		if (args.length == 1) {
 			if (args[0].equalsIgnoreCase("start")) {
 				if (sender.hasPermission("annihilation.command.start")) {
 					if (!plugin.startTimer()) {
-						sender.sendMessage(prefix + "§cThe game has already started");
+						sender.sendMessage(prefix + red + "The game has already started");
 					} else {
-						sender.sendMessage(prefix + "§aThe game has been started.");
+						sender.sendMessage(prefix + white + "The game has been started.");
 					}
-				} else sender.sendMessage(prefix + "§cYou cannot use this command!");
+				} else sender.sendMessage(prefix + red + "You cannot use this command!");
 			}
 		}
 		return false;
