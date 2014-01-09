@@ -139,10 +139,10 @@ public final class Annihilation extends JavaPlugin {
 		getCommand("stats").setExecutor(new StatsCommand(stats));
 		getCommand("team").setExecutor(new TeamCommand(this));
 		getCommand("vote").setExecutor(new VoteCommand(voting));
-		getCommand("red").setExecutor(new TeamShortcutCommand(this));
-		getCommand("green").setExecutor(new TeamShortcutCommand(this));
-		getCommand("yellow").setExecutor(new TeamShortcutCommand(this));
-		getCommand("blue").setExecutor(new TeamShortcutCommand(this));
+		getCommand("red").setExecutor(new TeamShortcutCommand());
+		getCommand("green").setExecutor(new TeamShortcutCommand());
+		getCommand("yellow").setExecutor(new TeamShortcutCommand());
+		getCommand("blue").setExecutor(new TeamShortcutCommand());
 
 		BarUtil.init(this);
 
