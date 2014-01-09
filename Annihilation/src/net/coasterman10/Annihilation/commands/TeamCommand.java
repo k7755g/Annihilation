@@ -3,7 +3,7 @@ package net.coasterman10.Annihilation.commands;
 import net.coasterman10.Annihilation.Annihilation;
 import net.coasterman10.Annihilation.AnnihilationTeam;
 import net.coasterman10.Annihilation.PlayerMeta;
-import net.coasterman10.Annihilation.ScoreboardUtil;
+import net.coasterman10.Annihilation.ScoreboardHandler;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -57,7 +57,7 @@ public class TeamCommand implements CommandExecutor {
 				+ target.coloredName());
 		meta.setTeam(target);
 
-		ScoreboardUtil.addPlayerToTeam(player, target.name());
+		plugin.getScoreboardHandler().teams.get(team.toUpperCase()).addPlayer(player);
 		
 		if (plugin.getPhase() > 0) {
 			Annihilation.Util.sendPlayerToGame(player);

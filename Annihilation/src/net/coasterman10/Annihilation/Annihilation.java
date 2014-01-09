@@ -36,6 +36,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
@@ -44,6 +45,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scoreboard.Team;
 
 public final class Annihilation extends JavaPlugin {
 	private ConfigManager configManager;
@@ -55,6 +57,7 @@ public final class Annihilation extends JavaPlugin {
 	private EnderChestListener enderChests;
 	private StatsManager stats;
 	private SignHandler sign;
+	private ScoreboardHandler sb;
 	private DatabaseHandler db;
 	public boolean useMysql = false;
 	public boolean updateAvailable = false;
@@ -97,11 +100,14 @@ public final class Annihilation extends JavaPlugin {
 		timer = new PhaseTimer(this, config.getInt("start-delay"),
 				config.getInt("phase-period"));
 		voting = new VotingManager(this);
-
+		sb = new ScoreboardHandler(this);
+		
 		PluginManager pm = getServer().getPluginManager();
 
 		sign.loadSigns();
 
+		sb.resetScoreboard("§3Voting §6(Type /vote <name>)");
+		
 		pm.registerEvents(resources, this);
 		pm.registerEvents(enderFurnaces, this);
 		pm.registerEvents(enderChests, this);
@@ -138,9 +144,6 @@ public final class Annihilation extends JavaPlugin {
 					+ "UNIQUE KEY `username` (`username`) ) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
 		} else
 			db = new DatabaseHandler(this);
-
-		for (AnnihilationTeam team : AnnihilationTeam.teams())
-			ScoreboardUtil.registerTeam(team.name(), team.color());
 
 		reset();
 
@@ -199,18 +202,29 @@ public final class Annihilation extends JavaPlugin {
 	public void startGame() {
 		Bukkit.getPluginManager().callEvent(
 				new GameStartEvent(maps.getCurrentMap()));
-
-		ScoreboardUtil.setTitle(ChatColor.GOLD + "Map: "
-				+ WordUtils.capitalize(voting.getWinner()));
-		ScoreboardUtil.removeAllScores();
-		for (AnnihilationTeam t : AnnihilationTeam.teams())
-			ScoreboardUtil.setScore(t.coloredName() + " Nexus", t.getNexus()
-					.getHealth());
-
-		for (Player p : getServer().getOnlinePlayers()) {
-			Util.sendPlayerToGame(p);
+		sb.scores.clear();
+		
+		for(OfflinePlayer score : sb.sb.getPlayers())
+			sb.sb.resetScores(score);
+		
+		sb.obj.setDisplayName("§6Map: " + WordUtils.capitalize(voting.getWinner()));
+		
+		for (AnnihilationTeam t : AnnihilationTeam.teams()) {
+			sb.scores.put(t.name(), sb.obj.getScore(Bukkit.getOfflinePlayer(WordUtils.capitalize(t.name().toLowerCase() + " Nexus"))));
+			sb.scores.get(t.name()).setScore(t.getNexus().getHealth());
+			
+			Team sbt = sb.sb.registerNewTeam(t.name() + "SB");
+			sbt.addPlayer(Bukkit.getOfflinePlayer(WordUtils.capitalize(WordUtils.capitalize(t.name().toLowerCase() + " Nexus"))));
+			sbt.setPrefix(t.color().toString());
 		}
+		
+		sb.obj.setDisplayName("§6Map: " + WordUtils.capitalize(voting.getWinner()));
+		
+		for (Player p : getServer().getOnlinePlayers())
+			if (PlayerMeta.getMeta(p).getTeam() != AnnihilationTeam.NONE) Util.sendPlayerToGame(p);
 
+		sb.update();
+		
 		getServer().getScheduler().runTaskTimer(this, new Runnable() {
 			@Override
 			public void run() {
@@ -243,7 +257,7 @@ public final class Annihilation extends JavaPlugin {
 			String winner = voting.getWinner();
 			maps.selectMap(winner);
 			getServer().broadcastMessage(
-					ChatColor.GREEN + winner + " selected, loading...");
+					ChatColor.GREEN + WordUtils.capitalize(winner) + " was chosen!");
 			loadMap(winner);
 
 			voting.end();
@@ -284,6 +298,10 @@ public final class Annihilation extends JavaPlugin {
 	public VotingManager getVotingManager() {
 		return voting;
 	}
+	
+	public ScoreboardHandler getScoreboardHandler() {
+		return sb;
+	}
 
 	public void endGame(AnnihilationTeam winner) {
 		if (winner == null)
@@ -302,7 +320,7 @@ public final class Annihilation extends JavaPlugin {
 
 	@SuppressWarnings("deprecation")
 	public void reset() {
-		ScoreboardUtil.showForPlayers(getServer().getOnlinePlayers());
+		sb.resetScoreboard("§3Voting §6(Type /vote <name>)");
 		maps.reset();
 		timer.reset();
 		for (Player p : getServer().getOnlinePlayers()) {
@@ -322,6 +340,7 @@ public final class Annihilation extends JavaPlugin {
 		}
 
 		voting.start();
+		sb.update();
 	}
 
 	public void checkWin() {

@@ -23,18 +23,18 @@ public class ChatUtil {
 	}
 
 	public static void nexusDestroyed(AnnihilationTeam attacker,
-			AnnihilationTeam victim) {
-		broadcast(GRAY + "===============[ " + DARK_AQUA + "Nexus Destroyed"
+			AnnihilationTeam victim, Player p) {
+		broadcast(GRAY + "===============[ " + victim.color().toString() + "Nexus Destroyed"
 				+ GRAY + " ]===============");
-		broadcast(victim.coloredName() + "'s" + GRAY
-				+ " nexus has been destroyed by " + attacker.coloredName());
+		broadcast(attacker.color().toString() + p.getName() + GRAY + " from " + attacker.coloredName() + GRAY + 
+				" destroyed " + victim.coloredName() + "'s" + GRAY + " Nexus!");
 		broadcast(GRAY + "===============================================");
 	}
 
 	public static String nexusBreakMessage(Player breaker,
 			AnnihilationTeam attacker, AnnihilationTeam victim) {
 		return colorizeName(breaker, attacker) + GRAY + " has damaged the "
-				+ victim.coloredName() + " team's nexus!";
+				+ victim.coloredName() + " team's Nexus!";
 	}
 
 	private static String colorizeName(Player player, AnnihilationTeam team) {
@@ -64,10 +64,10 @@ public class ChatUtil {
 	}
 
 	public static void winMessage(AnnihilationTeam winner) {
-		broadcast(GRAY + "==========[ " + DARK_AQUA + "End Game" + GRAY
-				+ " ]==========");
-		broadcast(winner.coloredName() + " wins!");
-		broadcast(GRAY + "==============================");
+		broadcast(GRAY + "================[ " + winner.color().toString()  + "End Game" + GRAY
+				+ " ]================");
+		broadcast(GRAY + "Team " +  winner.coloredName() + GRAY + " Wins Annihilation! Restarting game...");
+		broadcast(GRAY + "==========================================");
 	}
 
 	public static String formatDeathMessage(Player victim, Player killer,

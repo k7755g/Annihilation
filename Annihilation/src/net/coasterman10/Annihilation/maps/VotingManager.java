@@ -5,8 +5,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.coasterman10.Annihilation.Annihilation;
-import net.coasterman10.Annihilation.ScoreboardUtil;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
@@ -24,26 +24,26 @@ public class VotingManager {
 		maps.clear();
 		votes.clear();
 		
-		ScoreboardUtil.removeAllScores();
-		String title = ChatColor.DARK_AQUA + "" + ChatColor.BOLD + "Voting";
-		ScoreboardUtil.setTitle(title);
-
 		for (String map : plugin.getMapManager().getRandomMaps()) {
 			maps.add(map);
-			ScoreboardUtil.setScore(map, 1);
-			ScoreboardUtil.setScore(map, 0);
+			plugin.getScoreboardHandler().scores.put(
+					map, plugin.getScoreboardHandler().obj.getScore(Bukkit.getOfflinePlayer(map)));
+			plugin.getScoreboardHandler().scores.get(map).setScore(0);
 		}
 		
 		running = true;
+		
+		plugin.getScoreboardHandler().update();
 	}
 
 	public boolean vote(CommandSender voter, String vote) {
 		for (String map : maps) {
 			if (vote.equalsIgnoreCase(map)) {
 				votes.put(voter.getName(), map);
-				ScoreboardUtil.setScore(map, countVotes(map));
+				plugin.getScoreboardHandler().scores.get(map).setScore(countVotes(map));
 				voter.sendMessage(ChatColor.GOLD + "You voted for "
 						+ ChatColor.WHITE + map);
+				plugin.getScoreboardHandler().update();
 				return true;
 			}
 		}

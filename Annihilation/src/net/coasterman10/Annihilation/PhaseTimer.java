@@ -98,14 +98,14 @@ public class PhaseTimer {
 
 		if (phase == 0) {
 			percent = (float) -time / (float) startTime;
-			text = ChatColor.GREEN + "Starting in " + -time;
+			text = ChatColor.GREEN + "Starting in " + timeString(-time);
 		} else {
 			if (phase == 5)
 				percent = 1F;
 			else
 				percent = (float) getRemainingPhaseTime() / (float) phaseTime;
 			text = getPhaseColor() + "Phase " + ChatUtil.translateRoman(phase) + ChatColor.DARK_GRAY + " | "
-					+ timeString(time);
+					+ ChatColor.WHITE + timeString(time);
 			
 			plugin.getSignHandler().updateSigns(AnnihilationTeam.RED);
 			plugin.getSignHandler().updateSigns(AnnihilationTeam.BLUE);
@@ -140,6 +140,6 @@ public class PhaseTimer {
 		long hours = time / 3600L;
 		long minutes = (time - hours * 3600L) / 60L;
 		long seconds = time - hours * 3600L - minutes * 60L;
-		return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+		return String.format("§f%02d§7:§f%02d§7:§f%02d", hours, minutes, seconds);
 	}
 }

@@ -4,7 +4,6 @@ import net.coasterman10.Annihilation.Annihilation;
 import net.coasterman10.Annihilation.AnnihilationTeam;
 import net.coasterman10.Annihilation.Kit;
 import net.coasterman10.Annihilation.PlayerMeta;
-import net.coasterman10.Annihilation.ScoreboardUtil;
 import net.coasterman10.Annihilation.api.NexusDamageEvent;
 import net.coasterman10.Annihilation.api.NexusDestroyEvent;
 import net.coasterman10.Annihilation.bar.BarUtil;
@@ -24,8 +23,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -82,7 +81,7 @@ public class PlayerListener implements Listener {
 					if (team != null) {
 						if (pmeta.getTeam() == AnnihilationTeam.NONE) {
 							pmeta.setTeam(team);
-							ScoreboardUtil.addPlayerToTeam(player, team.name());
+							plugin.getScoreboardHandler().teams.get(team.name()).addPlayer(player);
 							player.sendMessage(ChatColor.DARK_AQUA
 									+ "You joined " + team.coloredName());
 							if (plugin.getPhase() > 0)
@@ -120,23 +119,22 @@ public class PlayerListener implements Listener {
 		else
 			player.teleport(plugin.getMapManager().getLobbySpawnPoint());
 
-		if (plugin.useMysql) {
+		if (plugin.useMysql) 
 			plugin.getDatabaseHandler()
 					.query("INSERT IGNORE INTO `annihilation` (`username`, `kills`, "
 							+ "`deaths`, `wins`, `losses`, `nexus_damage`) VALUES "
 							+ "('"
 							+ player.getName()
 							+ "', '0', '0', '0', '0', '0');");
-		}
+		
 
 		if (plugin.getPhase() == 0 && plugin.getVotingManager().isRunning()) {
 			BarUtil.setMessageAndPercent(player, ChatColor.DARK_AQUA
-					+ "Welcome to Annihilation!", 0.01F);
-		} else {
-			ScoreboardUtil.showForPlayers(player);
+					+ "Welcome to Annihilation!", 0.01f);
 		}
 
 		plugin.getSignHandler().updateSigns(meta.getTeam());
+		plugin.getScoreboardHandler().update();
 	}
 
 	@EventHandler
@@ -170,12 +168,13 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onPlayerDamage(EntityDamageEvent e) {
 		if (e.getEntity() instanceof Player) {
-			if (e.getEntity().getWorld().getName().equals("lobby"))
+			if (e.getEntity().getWorld().getName().equals("lobby")) {
 				e.setCancelled(true);
 
-			if (e.getCause() == DamageCause.VOID)
-				e.getEntity().teleport(
+				if (e.getCause() == DamageCause.VOID)
+					e.getEntity().teleport(
 						plugin.getMapManager().getLobbySpawnPoint());
+			}
 		}
 	}
 
@@ -249,7 +248,7 @@ public class PlayerListener implements Listener {
 		}
 	}
 
-	private void breakNexus(AnnihilationTeam victim, Player breaker) {
+	private void breakNexus(final AnnihilationTeam victim, Player breaker) {
 		AnnihilationTeam attacker = PlayerMeta.getMeta(breaker).getTeam();
 		if (victim == attacker)
 			breaker.sendMessage(ChatColor.DARK_AQUA
@@ -258,6 +257,7 @@ public class PlayerListener implements Listener {
 			breaker.sendMessage(ChatColor.DARK_AQUA
 					+ "Nexuses are invincible in phase 1");
 		else {
+			plugin.getScoreboardHandler().sb.getTeam(victim.name() + "SB").setPrefix("§r");
 			victim.getNexus().damage(plugin.getPhase() == 5 ? 2 : 1);
 
 			plugin.getStatsManager().incrementStat(StatType.NEXUS_DAMAGE,
@@ -267,20 +267,25 @@ public class PlayerListener implements Listener {
 			for (Player p : attacker.getPlayers())
 				p.sendMessage(msg);
 
-			ScoreboardUtil.setScore(victim + " Nexus", victim.getNexus()
-					.getHealth());
-
+			plugin.getScoreboardHandler().scores.get(victim.name()).setScore(victim.getNexus().getHealth());
 			Bukkit.getServer()
 					.getPluginManager()
 					.callEvent(
 							new NexusDamageEvent(breaker, victim, victim
 									.getNexus().getHealth()));
 
+			Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+				@Override
+				public void run() {
+					plugin.getScoreboardHandler().sb.getTeam(victim.name() + "SB").setPrefix(victim.color().toString());
+				}
+			}, 1L);
+			
 			if (victim.getNexus().getHealth() == 0) {
-				ScoreboardUtil.removeScore(victim.coloredName() + " Nexus");
+				plugin.getScoreboardHandler().sb.resetScores(plugin.getScoreboardHandler().scores.remove(victim.name()).getPlayer());
 				Bukkit.getServer().getPluginManager()
 						.callEvent(new NexusDestroyEvent(breaker, victim));
-				ChatUtil.nexusDestroyed(attacker, victim);
+				ChatUtil.nexusDestroyed(attacker, victim, breaker);
 				plugin.checkWin();
 				for (Player p : victim.getPlayers()) {
 					plugin.getStatsManager().incrementStat(StatType.LOSSES, p);
