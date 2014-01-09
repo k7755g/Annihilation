@@ -47,7 +47,7 @@ public class StatsCommand implements CommandExecutor {
 				listStats((Player) sender);
 			}
 		} else {
-
+			sender.sendMessage(ChatColor.RED + "Can only be run by a player!");
 		}
 
 		return true;

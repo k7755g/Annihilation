@@ -13,6 +13,7 @@ import net.coasterman10.Annihilation.chat.ChatListener;
 import net.coasterman10.Annihilation.chat.ChatUtil;
 import net.coasterman10.Annihilation.commands.AnnihilationCommand;
 import net.coasterman10.Annihilation.commands.ClassCommand;
+import net.coasterman10.Annihilation.commands.DistanceCommand;
 import net.coasterman10.Annihilation.commands.StatsCommand;
 import net.coasterman10.Annihilation.commands.TeamCommand;
 import net.coasterman10.Annihilation.commands.TeamShortcutCommand;
@@ -48,6 +49,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.scoreboard.Team;
 
 public final class Annihilation extends JavaPlugin {
@@ -143,6 +145,7 @@ public final class Annihilation extends JavaPlugin {
 		getCommand("green").setExecutor(new TeamShortcutCommand());
 		getCommand("yellow").setExecutor(new TeamShortcutCommand());
 		getCommand("blue").setExecutor(new TeamShortcutCommand());
+		getCommand("distance").setExecutor(new DistanceCommand(this));
 
 		BarUtil.init(this);
 
@@ -358,7 +361,6 @@ public final class Annihilation extends JavaPlugin {
 		new RestartTimer(this, restartDelay).start(timer.getTime());
 	}
 
-	@SuppressWarnings("deprecation")
 	public void reset() {
 		sb.resetScoreboard(ChatColor.DARK_AQUA + "Voting" + ChatColor.WHITE
 				+ " | " + ChatColor.GOLD + "/vote <name>");
@@ -366,12 +368,6 @@ public final class Annihilation extends JavaPlugin {
 		timer.reset();
 		for (Player p : getServer().getOnlinePlayers()) {
 			PlayerMeta.getMeta(p).setTeam(AnnihilationTeam.NONE);
-			PlayerInventory inv = p.getInventory();
-			inv.setHelmet(null);
-			inv.setChestplate(null);
-			inv.setLeggings(null);
-			inv.setBoots(null);
-			p.updateInventory();
 			p.teleport(maps.getLobbySpawnPoint());
 			BarUtil.setMessageAndPercent(p, ChatColor.DARK_AQUA
 					+ "Welcome to Annihilation!", 0.01F);
@@ -389,6 +385,31 @@ public final class Annihilation extends JavaPlugin {
 				pp.showPlayer(p);
 			}
 		}
+		
+		Bukkit.getScheduler().runTaskLater(this, new Runnable() {
+			@SuppressWarnings("deprecation")
+			@Override
+			public void run() {
+				for (Player p : getServer().getOnlinePlayers()) {
+					PlayerInventory inv = p.getInventory();
+					inv.setHelmet(null);
+					inv.setChestplate(null);
+					inv.setLeggings(null);
+					inv.setBoots(null);
+					
+					p.getInventory().clear();
+					
+					for(PotionEffect effect : p.getActivePotionEffects())
+						p.removePotionEffect(effect.getType());
+					
+					p.setLevel(0);
+					p.setExp(0);
+					p.setSaturation(20F);
+					
+					p.updateInventory();
+				}
+			}
+		}, 2L);
 	}
 
 	public void checkWin() {

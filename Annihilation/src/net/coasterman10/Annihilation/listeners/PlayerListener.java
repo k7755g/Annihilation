@@ -80,6 +80,13 @@ public class PlayerListener implements Listener {
 							.toUpperCase());
 					if (team != null) {
 						if (pmeta.getTeam() == AnnihilationTeam.NONE) {
+							if (team.getNexus() != null) {
+								if (team.getNexus().getHealth() == 0 && plugin.getPhase() > 1) {
+									player.sendMessage(ChatColor.RED + "You cannot join a team without a Nexus!");
+									return;
+								}
+							}
+							
 							pmeta.setTeam(team);
 							plugin.getScoreboardHandler().teams
 									.get(team.name()).addPlayer(player);

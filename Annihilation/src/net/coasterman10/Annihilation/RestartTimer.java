@@ -29,7 +29,7 @@ public class RestartTimer {
 							stop();
 							return;
 						}
-						String message = ChatColor.GRAY + "Total time: "
+						String message = ChatColor.GOLD + "Total time: "
 								+ ChatColor.WHITE + totalTime + " | "
 								+ ChatColor.GREEN + "Restarting in "
 								+ time;

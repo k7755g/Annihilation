@@ -14,8 +14,10 @@ commands:
     aliases: v
   stats:
     description: Lists your stats
+    aliases: s
   class:
     description: Selects your kit
+    aliases: c
   blue:
     description: Join the Blue team!
   green:
@@ -24,3 +26,6 @@ commands:
     description: Join the Yellow team!
   red:
     description: Join the Red team!
+  distance:
+    description: Join the Red team!
+    aliases: [d, dis]

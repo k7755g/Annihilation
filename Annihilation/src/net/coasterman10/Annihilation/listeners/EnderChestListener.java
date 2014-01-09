@@ -16,6 +16,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -60,6 +61,13 @@ public class EnderChestListener implements Listener {
 		player.openInventory(inventories.get(name));
 	}
 
+	@EventHandler
+	public void onFurnaceBreak(BlockBreakEvent e) {
+		if (chests.values().contains(e.getBlock().getLocation()))
+			e.setCancelled(true);
+	}
+
+	
 	private void openEnemyEnderChest(Player player, AnnihilationTeam owner) {
 		LinkedList<Inventory> shuffledInventories = new LinkedList<Inventory>();
 		for (Entry<String, Inventory> entry : inventories.entrySet())

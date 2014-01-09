@@ -52,6 +52,13 @@ public class TeamCommand implements CommandExecutor {
 			return;
 		}
 
+		if (target.getNexus() != null) {
+			if (target.getNexus().getHealth() == 0 && plugin.getPhase() > 1) {
+				player.sendMessage(ChatColor.RED + "You cannot join a team without a Nexus!");
+				return;
+			}
+		}
+		
 		player.sendMessage(ChatColor.DARK_AQUA + "You joined "
 				+ target.coloredName());
 		meta.setTeam(target);
