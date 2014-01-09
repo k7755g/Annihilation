@@ -1,5 +1,6 @@
 package net.coasterman10.Annihilation;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -67,6 +68,13 @@ public final class Annihilation extends JavaPlugin {
 
 	@Override
 	public void onEnable() {
+		try {
+		    Metrics metrics = new Metrics(this);
+		    metrics.start();
+		} catch (IOException e) {
+		    // Failed to submit the stats :-(
+		}
+		
 		UpdateResult updateResult = null;
 		Updater u = null;
 
