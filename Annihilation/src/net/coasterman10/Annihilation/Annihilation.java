@@ -82,7 +82,7 @@ public final class Annihilation extends JavaPlugin {
 		Updater u = null;
 
 		if (this.getConfig().getBoolean("allowUpdater"))
-			u = new Updater(this, 00000, this.getFile(),
+			u = new Updater(this, 72127, this.getFile(),
 					Updater.UpdateType.DEFAULT, true);
 
 		if (u != null)
