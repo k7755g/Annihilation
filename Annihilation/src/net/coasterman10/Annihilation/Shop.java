@@ -31,7 +31,6 @@ public class Shop implements Listener {
 		}
 
 		public ShopItem setName(String name) {
-			// Prepend white chat color to prevent italicization
 			ItemMeta meta = item.getItemMeta();
 			meta.setDisplayName(ChatColor.WHITE + name);
 			item.setItemMeta(meta);
