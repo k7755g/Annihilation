@@ -32,7 +32,7 @@ public class RestartTimer {
 						String message = ChatColor.GRAY + "Total time: "
 								+ ChatColor.WHITE + totalTime + " | "
 								+ ChatColor.GREEN + "Restarting in "
-								+ timeString(time);
+								+ time;
 						float percent = (float) time / (float) delay;
 						for (Player p : Bukkit.getOnlinePlayers())
 							BarUtil.setMessageAndPercent(p, message, percent);
@@ -43,14 +43,5 @@ public class RestartTimer {
 
 	private void stop() {
 		Bukkit.getScheduler().cancelTask(taskID);
-	}
-
-	public static String timeString(long time) {
-		long hours = time / 3600L;
-		long minutes = (time - hours * 3600L) / 60L;
-		long seconds = time - hours * 3600L - minutes * 60L;
-		return String.format(ChatColor.WHITE + "%02d" + ChatColor.GRAY + ":"
-				+ ChatColor.WHITE + "%02d" + ChatColor.GRAY + ":"
-				+ ChatColor.WHITE + "%02d", hours, minutes, seconds);
 	}
 }

@@ -98,7 +98,7 @@ public class PhaseTimer {
 
 		if (phase == 0) {
 			percent = (float) -time / (float) startTime;
-			text = ChatColor.GREEN + "Starting in " + timeString(-time);
+			text = ChatColor.GREEN + "Starting in " + -time;
 		} else {
 			if (phase == 5)
 				percent = 1F;
