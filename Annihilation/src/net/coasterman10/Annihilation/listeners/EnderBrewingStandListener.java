@@ -42,7 +42,7 @@ public class EnderBrewingStandListener implements Listener {
 			return;
 		
 		Block b = e.getClickedBlock();
-		if (b.getType() != Material.FURNACE)
+		if (b.getType() != Material.BREWING_STAND)
 			return;
 
 		Location loc = b.getLocation();
