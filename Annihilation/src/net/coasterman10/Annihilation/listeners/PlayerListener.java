@@ -114,8 +114,8 @@ public class PlayerListener implements Listener {
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
 		String prefix = ChatColor.AQUA + "[Annihilation] " + ChatColor.GRAY;
-		
 		Player player = e.getPlayer();
+		
 		PlayerMeta meta = PlayerMeta.getMeta(player);
 		
 		if (player.hasPermission("annihilation.misc.updatenotify") && plugin.updateAvailable) {
@@ -151,12 +151,15 @@ public class PlayerListener implements Listener {
 
 		if (plugin.getPhase() > 0) {
 			PlayerMeta meta = PlayerMeta.getMeta(p);
-			if (!meta.getTeam().getNexus().isAlive())
+			if (!meta.getTeam().getNexus().isAlive()) {
 				meta.setAlive(false);
+				for (Player pp : Bukkit.getOnlinePlayers())
+					pp.hidePlayer(p);
+			}
 		}
 
 		plugin.getStatsManager().setValue(StatType.DEATHS, p,
-				plugin.getStatsManager().getStat(StatType.DEATHS, p) + 1);
+		plugin.getStatsManager().getStat(StatType.DEATHS, p) + 1);
 
 		if (p.getKiller() != null && !p.getKiller().equals(p)) {
 			Player killer = p.getKiller();
