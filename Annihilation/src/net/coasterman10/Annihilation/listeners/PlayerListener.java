@@ -113,8 +113,16 @@ public class PlayerListener implements Listener {
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
+		String prefix = "§3[Annihilation] §7";
+		
 		Player player = e.getPlayer();
 		PlayerMeta meta = PlayerMeta.getMeta(player);
+		
+		if (player.hasPermission("annihilation.misc.updatenotify") && plugin.updateAvailable) {
+			player.sendMessage(prefix + " §bAn update is available! Please restart the server to apply this update.");
+			player.sendMessage(prefix + " §7Current Version: §f" + plugin.getDescription().getVersion() + " §8| §7Newest Version: §f" + plugin.newVersion);
+		}
+		
 		if (meta.isAlive())
 			player.teleport(meta.getTeam().getRandomSpawn());
 		else
