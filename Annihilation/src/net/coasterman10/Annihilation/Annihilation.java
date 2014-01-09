@@ -225,6 +225,13 @@ public final class Annihilation extends JavaPlugin {
 	}
 
 	public void startGame() {
+		for (Player p : Bukkit.getOnlinePlayers()) {
+			for (Player pp : Bukkit.getOnlinePlayers()) {
+				p.showPlayer(pp);
+				pp.showPlayer(p);
+			}
+		}
+		
 		Bukkit.getPluginManager().callEvent(
 				new GameStartEvent(maps.getCurrentMap()));
 		sb.scores.clear();
