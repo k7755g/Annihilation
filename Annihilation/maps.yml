@@ -30,6 +30,14 @@ test:
     yellow: "-22,65,22"
     green: "22,65,22"
     blue: "22,65,-22"
+        
+  # Ender brewing stands for each team, only one each.
+  # Option.
+  brewingstands:
+    red: "-20,65,-20"
+    yellow: "-20,65,20"
+    green: "20,65,20"
+    blue: "20,65,-20"
     
   # Ender chests for each team, only one each.
   # Optional.

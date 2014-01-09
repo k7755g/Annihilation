@@ -7,7 +7,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.v1_7_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_7_R1.inventory.CraftInventoryFurnace;
+import org.bukkit.craftbukkit.v1_7_R1.inventory.CraftInventoryBrewer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -21,18 +21,18 @@ import net.coasterman10.Annihilation.AnnihilationTeam;
 import net.coasterman10.Annihilation.PlayerMeta;
 import net.minecraft.server.v1_7_R1.EntityHuman;
 import net.minecraft.server.v1_7_R1.EntityPlayer;
-import net.minecraft.server.v1_7_R1.TileEntityFurnace;
+import net.minecraft.server.v1_7_R1.TileEntityBrewingStand;
 
-public class EnderFurnaceListener implements Listener {
+public class EnderBrewingStandListener implements Listener {
 	private HashMap<AnnihilationTeam, Location> locations;
-	private HashMap<String, VirtualFurnace> furnaces;
+	private HashMap<String, VirtualBrewingStand> brewingStands;
 
-	public EnderFurnaceListener() {
+	public EnderBrewingStandListener() {
 		locations = new HashMap<AnnihilationTeam, Location>();
-		furnaces = new HashMap<String, VirtualFurnace>();
+		brewingStands = new HashMap<String, VirtualBrewingStand>();
 	}
 
-	public void setFurnaceLocation(AnnihilationTeam team, Location loc) {
+	public void setBrewingStandLocation(AnnihilationTeam team, Location loc) {
 		locations.put(team, loc);
 	}
 
@@ -50,11 +50,11 @@ public class EnderFurnaceListener implements Listener {
 		AnnihilationTeam team = PlayerMeta.getMeta(player).getTeam();
 		if (team == null || !locations.containsKey(team))
 			return;
-
+		
 		e.setCancelled(true);
 		if (locations.get(team).equals(loc)) {
 			EntityPlayer handle = ((CraftPlayer) player).getHandle();
-			handle.openFurnace(getFurnace(player));
+			handle.openBrewingStand(getBrewingStand(player));
 			player.sendMessage(ChatColor.DARK_AQUA
 					+ "This is your team's Ender Furnace. Any items you store or smelt here are safe from all other players.");
 		}
@@ -66,19 +66,19 @@ public class EnderFurnaceListener implements Listener {
 			e.setCancelled(true);
 	}
 
-	private VirtualFurnace getFurnace(Player player) {
-		if (!furnaces.containsKey(player.getName())) {
+	private VirtualBrewingStand getBrewingStand(Player player) {
+		if (!brewingStands.containsKey(player.getName())) {
 			EntityPlayer handle = ((CraftPlayer) player).getHandle();
-			furnaces.put(player.getName(), new VirtualFurnace(handle));
+			brewingStands.put(player.getName(), new VirtualBrewingStand(handle));
 		}
-		return furnaces.get(player.getName());
+		return brewingStands.get(player.getName());
 	}
 
-	private class VirtualFurnace extends TileEntityFurnace {
-		public VirtualFurnace(EntityHuman entity) {
+	private class VirtualBrewingStand extends TileEntityBrewingStand {
+		public VirtualBrewingStand(EntityHuman entity) {
 			world = entity.world;
 		}
-
+		
 		@Override
 		public boolean a(EntityHuman entity) {
 			return true;
@@ -91,7 +91,7 @@ public class EnderFurnaceListener implements Listener {
 
 		@Override
 		public net.minecraft.server.v1_7_R1.Block q() {
-			return net.minecraft.server.v1_7_R1.Blocks.FURNACE;
+			return net.minecraft.server.v1_7_R1.Blocks.BREWING_STAND;
 		}
 
 		@Override
@@ -104,7 +104,7 @@ public class EnderFurnaceListener implements Listener {
 			return new InventoryHolder() {
 				@Override
 				public Inventory getInventory() {
-					return new CraftInventoryFurnace(VirtualFurnace.this);
+					return new CraftInventoryBrewer(VirtualBrewingStand.this);
 				}
 			};
 		}
