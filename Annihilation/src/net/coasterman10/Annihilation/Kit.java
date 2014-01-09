@@ -180,8 +180,8 @@ public enum Kit {
 		return name().substring(0, 1) + name().substring(1).toLowerCase();
 	}
 
-	public boolean isOwnedBy(Player player) {
-		return true;
+	public boolean isOwnedBy(Player p) {
+		return p.hasPermission("annihilation.kits." + getName().toLowerCase());
 	}
 
 	public void addScoutParticles(Player p) {
