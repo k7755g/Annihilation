@@ -56,7 +56,7 @@ public class EnderBrewingStandListener implements Listener {
 			EntityPlayer handle = ((CraftPlayer) player).getHandle();
 			handle.openBrewingStand(getBrewingStand(player));
 			player.sendMessage(ChatColor.DARK_AQUA
-					+ "This is your team's Ender Furnace. Any items you store or smelt here are safe from all other players.");
+					+ "This is your team's Ender Brewing Stand. Any items you brew here are safe from all other players.");
 		}
 	}
 
