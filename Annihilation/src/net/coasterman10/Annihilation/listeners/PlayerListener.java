@@ -113,14 +113,14 @@ public class PlayerListener implements Listener {
 
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
-		String prefix = "§3[Annihilation] §7";
+		String prefix = "ï¿½3[Annihilation] ï¿½7";
 		
 		Player player = e.getPlayer();
 		PlayerMeta meta = PlayerMeta.getMeta(player);
 		
 		if (player.hasPermission("annihilation.misc.updatenotify") && plugin.updateAvailable) {
-			player.sendMessage(prefix + " §bAn update is available! Please restart the server to apply this update.");
-			player.sendMessage(prefix + " §7Current Version: §f" + plugin.getDescription().getVersion() + " §8| §7Newest Version: §f" + plugin.newVersion);
+			player.sendMessage(prefix + " ï¿½bAn update is available! Please restart the server to apply this update.");
+			player.sendMessage(prefix + " ï¿½7Current Version: ï¿½f" + plugin.getDescription().getVersion() + " ï¿½8| ï¿½7Newest Version: ï¿½f" + plugin.newVersion);
 		}
 		
 		if (meta.isAlive())
