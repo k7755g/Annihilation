@@ -19,3 +19,6 @@ MySQL:
     
 # Display Roman Numerals for phase numbers
 roman: true
+
+# Auto updater
+allowUpdater: true
