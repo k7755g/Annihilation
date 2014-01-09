@@ -3,7 +3,6 @@ package net.coasterman10.Annihilation.commands;
 import net.coasterman10.Annihilation.Annihilation;
 import net.coasterman10.Annihilation.AnnihilationTeam;
 import net.coasterman10.Annihilation.PlayerMeta;
-import net.coasterman10.Annihilation.ScoreboardHandler;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;

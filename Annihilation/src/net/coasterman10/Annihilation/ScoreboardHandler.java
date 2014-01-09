@@ -11,17 +11,11 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.Team;
 
 public class ScoreboardHandler {
-	private Annihilation plugin;
-	
 	public Scoreboard sb;
 	public Objective obj;
 	
 	public HashMap<String, Score> scores = new HashMap<String, Score>();
 	public HashMap<String, Team> teams = new HashMap<String, Team>();
-	
-	public ScoreboardHandler(Annihilation instance) {
-		this.plugin = instance;
-	}
 	
 	public void update() {
 		for (Player p : Bukkit.getOnlinePlayers())

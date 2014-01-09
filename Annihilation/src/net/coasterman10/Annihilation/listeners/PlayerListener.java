@@ -81,7 +81,8 @@ public class PlayerListener implements Listener {
 					if (team != null) {
 						if (pmeta.getTeam() == AnnihilationTeam.NONE) {
 							pmeta.setTeam(team);
-							plugin.getScoreboardHandler().teams.get(team.name()).addPlayer(player);
+							plugin.getScoreboardHandler().teams
+									.get(team.name()).addPlayer(player);
 							player.sendMessage(ChatColor.DARK_AQUA
 									+ "You joined " + team.coloredName());
 							if (plugin.getPhase() > 0)
@@ -119,14 +120,13 @@ public class PlayerListener implements Listener {
 		else
 			player.teleport(plugin.getMapManager().getLobbySpawnPoint());
 
-		if (plugin.useMysql) 
+		if (plugin.useMysql)
 			plugin.getDatabaseHandler()
 					.query("INSERT IGNORE INTO `annihilation` (`username`, `kills`, "
 							+ "`deaths`, `wins`, `losses`, `nexus_damage`) VALUES "
 							+ "('"
 							+ player.getName()
 							+ "', '0', '0', '0', '0', '0');");
-		
 
 		if (plugin.getPhase() == 0 && plugin.getVotingManager().isRunning()) {
 			BarUtil.setMessageAndPercent(player, ChatColor.DARK_AQUA
@@ -173,7 +173,7 @@ public class PlayerListener implements Listener {
 
 				if (e.getCause() == DamageCause.VOID)
 					e.getEntity().teleport(
-						plugin.getMapManager().getLobbySpawnPoint());
+							plugin.getMapManager().getLobbySpawnPoint());
 			}
 		}
 	}
@@ -257,7 +257,8 @@ public class PlayerListener implements Listener {
 			breaker.sendMessage(ChatColor.DARK_AQUA
 					+ "Nexuses are invincible in phase 1");
 		else {
-			plugin.getScoreboardHandler().sb.getTeam(victim.name() + "SB").setPrefix("§r");
+			plugin.getScoreboardHandler().sb.getTeam(victim.name() + "SB")
+					.setPrefix(ChatColor.RESET.toString());
 			victim.getNexus().damage(plugin.getPhase() == 5 ? 2 : 1);
 
 			plugin.getStatsManager().incrementStat(StatType.NEXUS_DAMAGE,
@@ -267,7 +268,8 @@ public class PlayerListener implements Listener {
 			for (Player p : attacker.getPlayers())
 				p.sendMessage(msg);
 
-			plugin.getScoreboardHandler().scores.get(victim.name()).setScore(victim.getNexus().getHealth());
+			plugin.getScoreboardHandler().scores.get(victim.name()).setScore(
+					victim.getNexus().getHealth());
 			Bukkit.getServer()
 					.getPluginManager()
 					.callEvent(
@@ -277,12 +279,16 @@ public class PlayerListener implements Listener {
 			Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
 				@Override
 				public void run() {
-					plugin.getScoreboardHandler().sb.getTeam(victim.name() + "SB").setPrefix(victim.color().toString());
+					plugin.getScoreboardHandler().sb.getTeam(
+							victim.name() + "SB").setPrefix(
+							victim.color().toString());
 				}
 			}, 1L);
-			
+
 			if (victim.getNexus().getHealth() == 0) {
-				plugin.getScoreboardHandler().sb.resetScores(plugin.getScoreboardHandler().scores.remove(victim.name()).getPlayer());
+				plugin.getScoreboardHandler().sb.resetScores(plugin
+						.getScoreboardHandler().scores.remove(victim.name())
+						.getPlayer());
 				Bukkit.getServer().getPluginManager()
 						.callEvent(new NexusDestroyEvent(breaker, victim));
 				ChatUtil.nexusDestroyed(attacker, victim, breaker);

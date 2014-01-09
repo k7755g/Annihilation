@@ -64,25 +64,26 @@ public final class Annihilation extends JavaPlugin {
 	public boolean useMysql = false;
 	public boolean updateAvailable = false;
 	public String newVersion;
-	
+
 	@Override
 	public void onEnable() {
-		 UpdateResult updateResult = null;
-         Updater u = null;
-         
-         if (this.getConfig().getBoolean("allowUpdater"))
-                 u = new Updater(this, 00000, this.getFile(), Updater.UpdateType.DEFAULT, true);
- 
-         if (u != null)
-                 updateResult = u.getResult();
-         
-         if (updateResult != null) {
-                 if (updateResult == UpdateResult.SUCCESS) {
-                         updateAvailable = true;
-                         newVersion = u.getLatestName();
-                 }
-         }
-		
+		UpdateResult updateResult = null;
+		Updater u = null;
+
+		if (this.getConfig().getBoolean("allowUpdater"))
+			u = new Updater(this, 00000, this.getFile(),
+					Updater.UpdateType.DEFAULT, true);
+
+		if (u != null)
+			updateResult = u.getResult();
+
+		if (updateResult != null) {
+			if (updateResult == UpdateResult.SUCCESS) {
+				updateAvailable = true;
+				newVersion = u.getLatestName();
+			}
+		}
+
 		configManager = new ConfigManager(this);
 		configManager.loadConfigFiles("config.yml", "maps.yml", "shops.yml",
 				"stats.yml");
@@ -103,14 +104,15 @@ public final class Annihilation extends JavaPlugin {
 		timer = new PhaseTimer(this, config.getInt("start-delay"),
 				config.getInt("phase-period"));
 		voting = new VotingManager(this);
-		sb = new ScoreboardHandler(this);
-		
+		sb = new ScoreboardHandler();
+
 		PluginManager pm = getServer().getPluginManager();
 
 		sign.loadSigns();
 
-		sb.resetScoreboard("§3Voting §6(Type /vote <name>)");
-		
+		sb.resetScoreboard(ChatColor.DARK_AQUA + "Voting" + ChatColor.WHITE
+				+ " | " + ChatColor.GOLD + "/vote <name>");
+
 		pm.registerEvents(resources, this);
 		pm.registerEvents(enderFurnaces, this);
 		pm.registerEvents(enderBrewingStands, this);
@@ -188,7 +190,8 @@ public final class Annihilation extends JavaPlugin {
 				loc.getBlock().setType(Material.FURNACE);
 			}
 			if (section.contains("brewingstands." + name)) {
-				Location loc = Util.parseLocation(w, section.getString("brewingstands." + name));
+				Location loc = Util.parseLocation(w,
+						section.getString("brewingstands." + name));
 				enderBrewingStands.setBrewingStandLocation(team, loc);
 				loc.getBlock().setType(Material.BREWING_STAND);
 			}
@@ -212,28 +215,35 @@ public final class Annihilation extends JavaPlugin {
 		Bukkit.getPluginManager().callEvent(
 				new GameStartEvent(maps.getCurrentMap()));
 		sb.scores.clear();
-		
-		for(OfflinePlayer score : sb.sb.getPlayers())
+
+		for (OfflinePlayer score : sb.sb.getPlayers())
 			sb.sb.resetScores(score);
-		
-		sb.obj.setDisplayName("§6Map: " + WordUtils.capitalize(voting.getWinner()));
-		
+
+		sb.obj.setDisplayName(ChatColor.DARK_AQUA + "Map: "
+				+ WordUtils.capitalize(voting.getWinner()));
+
 		for (AnnihilationTeam t : AnnihilationTeam.teams()) {
-			sb.scores.put(t.name(), sb.obj.getScore(Bukkit.getOfflinePlayer(WordUtils.capitalize(t.name().toLowerCase() + " Nexus"))));
+			sb.scores.put(t.name(), sb.obj.getScore(Bukkit
+					.getOfflinePlayer(WordUtils.capitalize(t.name()
+							.toLowerCase() + " Nexus"))));
 			sb.scores.get(t.name()).setScore(t.getNexus().getHealth());
-			
+
 			Team sbt = sb.sb.registerNewTeam(t.name() + "SB");
-			sbt.addPlayer(Bukkit.getOfflinePlayer(WordUtils.capitalize(WordUtils.capitalize(t.name().toLowerCase() + " Nexus"))));
+			sbt.addPlayer(Bukkit.getOfflinePlayer(WordUtils
+					.capitalize(WordUtils.capitalize(t.name().toLowerCase()
+							+ " Nexus"))));
 			sbt.setPrefix(t.color().toString());
 		}
-		
-		sb.obj.setDisplayName("§6Map: " + WordUtils.capitalize(voting.getWinner()));
-		
+
+		sb.obj.setDisplayName(ChatColor.DARK_AQUA + "Map: "
+				+ WordUtils.capitalize(voting.getWinner()));
+
 		for (Player p : getServer().getOnlinePlayers())
-			if (PlayerMeta.getMeta(p).getTeam() != AnnihilationTeam.NONE) Util.sendPlayerToGame(p);
+			if (PlayerMeta.getMeta(p).getTeam() != AnnihilationTeam.NONE)
+				Util.sendPlayerToGame(p);
 
 		sb.update();
-		
+
 		getServer().getScheduler().runTaskTimer(this, new Runnable() {
 			@Override
 			public void run() {
@@ -266,7 +276,8 @@ public final class Annihilation extends JavaPlugin {
 			String winner = voting.getWinner();
 			maps.selectMap(winner);
 			getServer().broadcastMessage(
-					ChatColor.GREEN + WordUtils.capitalize(winner) + " was chosen!");
+					ChatColor.GREEN + WordUtils.capitalize(winner)
+							+ " was chosen!");
 			loadMap(winner);
 
 			voting.end();
@@ -307,7 +318,7 @@ public final class Annihilation extends JavaPlugin {
 	public VotingManager getVotingManager() {
 		return voting;
 	}
-	
+
 	public ScoreboardHandler getScoreboardHandler() {
 		return sb;
 	}
@@ -329,13 +340,14 @@ public final class Annihilation extends JavaPlugin {
 
 	@SuppressWarnings("deprecation")
 	public void reset() {
-		sb.resetScoreboard("§3Voting §6(Type /vote <name>)");
+		sb.resetScoreboard(ChatColor.DARK_AQUA + "Voting" + ChatColor.WHITE
+				+ " | " + ChatColor.GOLD + "/vote <name>");
 		maps.reset();
 		timer.reset();
 		for (Player p : getServer().getOnlinePlayers()) {
 			PlayerMeta.getMeta(p).setTeam(AnnihilationTeam.NONE);
 			PlayerInventory inv = p.getInventory();
-			inv.setHelmet(null);	
+			inv.setHelmet(null);
 			inv.setChestplate(null);
 			inv.setLeggings(null);
 			inv.setBoots(null);

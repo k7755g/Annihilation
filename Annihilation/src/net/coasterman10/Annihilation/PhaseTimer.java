@@ -43,7 +43,7 @@ public class PhaseTimer {
 		for (Player p : Bukkit.getOnlinePlayers())
 			BarUtil.setMessageAndPercent(p, ChatColor.GREEN + "Starting in "
 					+ -time, 1F);
-		
+
 		plugin.getSignHandler().updateSigns(AnnihilationTeam.RED);
 		plugin.getSignHandler().updateSigns(AnnihilationTeam.BLUE);
 		plugin.getSignHandler().updateSigns(AnnihilationTeam.GREEN);
@@ -104,9 +104,10 @@ public class PhaseTimer {
 				percent = 1F;
 			else
 				percent = (float) getRemainingPhaseTime() / (float) phaseTime;
-			text = getPhaseColor() + "Phase " + ChatUtil.translateRoman(phase) + ChatColor.DARK_GRAY + " | "
-					+ ChatColor.WHITE + timeString(time);
-			
+			text = getPhaseColor() + "Phase " + ChatUtil.translateRoman(phase)
+					+ ChatColor.DARK_GRAY + " | " + ChatColor.WHITE
+					+ timeString(time);
+
 			plugin.getSignHandler().updateSigns(AnnihilationTeam.RED);
 			plugin.getSignHandler().updateSigns(AnnihilationTeam.BLUE);
 			plugin.getSignHandler().updateSigns(AnnihilationTeam.GREEN);
@@ -140,6 +141,8 @@ public class PhaseTimer {
 		long hours = time / 3600L;
 		long minutes = (time - hours * 3600L) / 60L;
 		long seconds = time - hours * 3600L - minutes * 60L;
-		return String.format("§f%02d§7:§f%02d§7:§f%02d", hours, minutes, seconds);
+		return String.format(ChatColor.WHITE + "%02d" + ChatColor.GRAY + ":"
+				+ ChatColor.WHITE + "%02d" + ChatColor.GRAY + ":"
+				+ ChatColor.WHITE + "%02d", hours, minutes, seconds);
 	}
 }
