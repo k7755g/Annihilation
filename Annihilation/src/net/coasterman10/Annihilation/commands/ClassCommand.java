@@ -31,7 +31,7 @@ public class ClassCommand implements CommandExecutor {
 						meta.setKit(kit);
 						player.sendMessage(ChatColor.DARK_AQUA + "You selected class " + kit.getName());
 						if (meta.isAlive())
-							player.setHealth(0.0);
+							player.sendMessage(ChatColor.GREEN + "You will recieve the class when you respawn.");
 					} else {
 						player.sendMessage(ChatColor.RED + "You do not own " + kit.getName());
 					}
