@@ -75,11 +75,11 @@ public class MapLoader {
 			String[] srcFiles = src.list();
 
 			if (existed)
-				log.info("Copying folder " + src.getName()
-						+ " and overwriting " + dest.getName());
+				log.info("Copying folder " + src.getAbsolutePath()
+						+ " and overwriting " + dest.getAbsolutePath());
 			else
-				log.info("Copying folder " + src.getName() + " to "
-						+ dest.getName());
+				log.info("Copying folder " + src.getAbsolutePath() + " to "
+						+ dest.getAbsolutePath());
 
 			for (String file : srcFiles) {
 				File srcFile = new File(src, file);
@@ -88,9 +88,9 @@ public class MapLoader {
 			}
 
 			if (existed)
-				log.info("Overwrote folder " + dest.getName());
+				log.info("Overwrote folder " + dest.getAbsolutePath());
 			else
-				log.info("Copied folder " + dest.getName());
+				log.info("Copied folder " + dest.getAbsolutePath());
 
 		} else {
 			InputStream in = new FileInputStream(src);

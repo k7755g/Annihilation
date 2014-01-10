@@ -150,7 +150,7 @@ public final class Annihilation extends JavaPlugin {
 		getCommand("yellow").setExecutor(new TeamShortcutCommand());
 		getCommand("blue").setExecutor(new TeamShortcutCommand());
 		getCommand("distance").setExecutor(new DistanceCommand(this));
-		getCommand("map").setExecutor(new MapCommand(mapLoader));
+		getCommand("map").setExecutor(new MapCommand(this, mapLoader));
 
 		BarUtil.init(this);
 
