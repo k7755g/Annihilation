@@ -25,6 +25,3 @@ allowUpdater: true
 
 # Amount of players required to start the game
 requiredToStart: 2
-
-# Build Distance from Nexus
-build: 10
