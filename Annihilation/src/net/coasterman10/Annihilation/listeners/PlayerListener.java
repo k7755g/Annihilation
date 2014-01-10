@@ -146,6 +146,7 @@ public class PlayerListener implements Listener {
 		if (plugin.getPhase() == 0 && plugin.getVotingManager().isRunning()) {
 			BarUtil.setMessageAndPercent(player, ChatColor.DARK_AQUA
 					+ "Welcome to Annihilation!", 0.01f);
+			plugin.checkStarting();
 		}
 
 		plugin.getSignHandler().updateSigns(meta.getTeam());

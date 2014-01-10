@@ -22,3 +22,6 @@ roman: true
 
 # Auto updater
 allowUpdater: true
+
+# Amount of players required to start the game
+requiredToStart: 2

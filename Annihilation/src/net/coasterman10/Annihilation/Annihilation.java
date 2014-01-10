@@ -35,6 +35,7 @@ import net.coasterman10.Annihilation.stats.StatType;
 import net.coasterman10.Annihilation.stats.StatsManager;
 
 import org.apache.commons.lang.WordUtils;
+import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -75,7 +76,7 @@ public final class Annihilation extends JavaPlugin {
 		    Metrics metrics = new Metrics(this);
 		    metrics.start();
 		} catch (IOException e) {
-		    // Failed to submit the stats :-(
+		    
 		}
 		
 		UpdateResult updateResult = null;
@@ -474,6 +475,13 @@ public final class Annihilation extends JavaPlugin {
 					hasBlock = true;
 			}
 			return !hasBlock;
+		}
+	}
+
+	public void checkStarting() {
+		if (!timer.isRunning()) {
+			if (Bukkit.getOnlinePlayers().length >= getConfig().getInt("requiredToStart"))
+				timer.start();
 		}
 	}
 }
