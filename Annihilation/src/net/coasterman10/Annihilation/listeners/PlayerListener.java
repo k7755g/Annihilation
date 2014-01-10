@@ -31,7 +31,9 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.potion.PotionEffect;
 
 public class PlayerListener implements Listener {
 	private final Annihilation plugin;
@@ -119,6 +121,7 @@ public class PlayerListener implements Listener {
 			e.setRespawnLocation(plugin.getMapManager().getLobbySpawnPoint());
 	}
 
+	@SuppressWarnings("deprecation")
 	@EventHandler
 	public void onPlayerJoin(PlayerJoinEvent e) {
 		String prefix = ChatColor.AQUA + "[Annihilation] " + ChatColor.GRAY;
@@ -133,8 +136,25 @@ public class PlayerListener implements Listener {
 		
 		if (meta.isAlive())
 			player.teleport(meta.getTeam().getRandomSpawn());
-		else
+		else {
 			player.teleport(plugin.getMapManager().getLobbySpawnPoint());
+			PlayerInventory inv = player.getInventory();
+			inv.setHelmet(null);
+			inv.setChestplate(null);
+			inv.setLeggings(null);
+			inv.setBoots(null);
+			
+			player.getInventory().clear();
+			
+			for(PotionEffect effect : player.getActivePotionEffects())
+				player.removePotionEffect(effect.getType());
+			
+			player.setLevel(0);
+			player.setExp(0);
+			player.setSaturation(20F);
+			
+			player.updateInventory();
+		}
 
 		if (plugin.useMysql)
 			plugin.getDatabaseHandler()
@@ -227,8 +247,22 @@ public class PlayerListener implements Listener {
 
 	@EventHandler
 	public void onPlace(BlockPlaceEvent e) {
-		if (Annihilation.Util.isEmptyColumn(e.getBlock().getLocation()))
-			e.setCancelled(true);
+		if (plugin.getPhase() > 0) {
+			if (Annihilation.Util.isEmptyColumn(e.getBlock().getLocation()))
+				e.setCancelled(true);
+			
+			if (e.getBlock().getLocation().distance(AnnihilationTeam.RED.getNexus().getLocation()) < plugin.build
+			|| e.getBlock().getLocation().distance(AnnihilationTeam.GREEN.getNexus().getLocation()) < plugin.build
+			|| e.getBlock().getLocation().distance(AnnihilationTeam.BLUE.getNexus().getLocation()) < plugin.build
+			|| e.getBlock().getLocation().distance(AnnihilationTeam.YELLOW.getNexus().getLocation()) < plugin.build
+			&& !e.getPlayer().hasPermission("annihilation.buildbypass")) {
+				e.getPlayer().sendMessage(ChatColor.RED + "You cannot build this close to the nexus!");
+				e.setCancelled(true);
+			}
+		} else {
+			if (!e.getPlayer().hasPermission("annihilation.buildbypass"))
+				e.setCancelled(true);
+		}
 	}
 
 	@EventHandler
@@ -240,9 +274,21 @@ public class PlayerListener implements Listener {
 					e.setCancelled(true);
 					if (t.getNexus().isAlive())
 						breakNexus(t, e.getPlayer());
-					break;
+					return;
 				}
 			}
+			
+			if (e.getBlock().getLocation().distance(AnnihilationTeam.RED.getNexus().getLocation()) < plugin.build
+			|| e.getBlock().getLocation().distance(AnnihilationTeam.GREEN.getNexus().getLocation()) < plugin.build
+			|| e.getBlock().getLocation().distance(AnnihilationTeam.BLUE.getNexus().getLocation()) < plugin.build
+			|| e.getBlock().getLocation().distance(AnnihilationTeam.YELLOW.getNexus().getLocation()) < plugin.build
+			&& !e.getPlayer().hasPermission("annihilation.buildbypass")) {
+				e.getPlayer().sendMessage(ChatColor.RED + "You cannot build this close to the nexus!");
+				e.setCancelled(true);
+			}
+		} else {
+			if (!e.getPlayer().hasPermission("annihilation.buildbypass"))
+				e.setCancelled(true);
 		}
 	}
 

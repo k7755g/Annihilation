@@ -24,41 +24,64 @@ public class MapCommand implements CommandExecutor {
 	}
 
 	@Override
-	public boolean onCommand(CommandSender sender, Command cmd, String label,
-			String[] args) {
-		if (args.length == 2) {
-			if (args[0].equalsIgnoreCase("edit")) {
-				loader.loadMap(args[1]);
-				WorldCreator wc = new WorldCreator(args[1]);
-				wc.generator(new VoidGenerator());
-				Bukkit.createWorld(wc);
-				sender.sendMessage(ChatColor.GREEN + "Map " + args[1]
-						+ " loaded for editing.");
-				if (sender instanceof Player) {
-					sender.sendMessage(ChatColor.GREEN + "Teleporting...");
-					World w = Bukkit.getWorld(args[1]);
-					Location loc = w.getSpawnLocation();
-					loc.setY(w.getHighestBlockYAt(loc));
-					((Player) sender).teleport(loc);
-				}
-			}
-			if (args[0].equalsIgnoreCase("save")) {
-				if (Bukkit.getWorld(args[1]) != null) {
-					Bukkit.getWorld(args[1]).save();
-					final CommandSender s = sender;
-					final String mapName = args[1];
-					Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
-						@Override
-						public void run() {
-							s.sendMessage(ChatColor.GREEN + "Map " + mapName
-									+ " saved.");
-							loader.saveMap(mapName);
+	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+		String cyan = ChatColor.DARK_AQUA.toString();
+		String white = ChatColor.WHITE.toString();
+		String gray = ChatColor.GRAY.toString();
+		String red = ChatColor.RED.toString();
+		String gold = ChatColor.GOLD.toString();
+		String yellow = ChatColor.YELLOW.toString();
+		String dgray = ChatColor.DARK_GRAY.toString();
+		final String green = ChatColor.GREEN.toString();
+		String prefix = cyan + "[Annihilation] " + gray;
+		
+		if (sender instanceof Player) {
+			Player p = (Player) sender;
+			if (args.length == 2) {
+				if (args[0].equalsIgnoreCase("edit")) {
+					if (p.hasPermission("annihilation.map.edit")) {
+						loader.loadMap(args[1]);
+						WorldCreator wc = new WorldCreator(args[1]);
+						wc.generator(new VoidGenerator());
+						Bukkit.createWorld(wc);
+						sender.sendMessage(green + "Map " + args[1]
+								+ " loaded for editing.");
+						if (sender instanceof Player) {
+							sender.sendMessage(green + "Teleporting...");
+							World w = Bukkit.getWorld(args[1]);
+							Location loc = w.getSpawnLocation();
+							loc.setY(w.getHighestBlockYAt(loc));
+							((Player) sender).teleport(loc);
 						}
-					}, 40L);
+					} else sender.sendMessage(prefix + red + "You cannot use this command!");
+					return true;
+				}
+				if (args[0].equalsIgnoreCase("save")) {
+					if (p.hasPermission("annihilation.map.save")) {
+						if (Bukkit.getWorld(args[1]) != null) {
+							Bukkit.getWorld(args[1]).save();
+							final CommandSender s = sender;
+							final String mapName = args[1];
+							Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+								@Override
+								public void run() {
+									s.sendMessage(green + "Map " + mapName
+											+ " saved.");
+									loader.saveMap(mapName);
+								}
+							}, 40L);
+						}
+					} else sender.sendMessage(prefix + red + "You cannot use this command!");
+					return true;
 				}
 			}
+			
+			sender.sendMessage(prefix + red + "Syntax: /map <save/edit> <name>");
+		} else {
+			sender.sendMessage(prefix + red + "Only a player can use the map editing tools!");
 		}
 		return true;
 	}
 
+	
 }

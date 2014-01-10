@@ -62,12 +62,12 @@ public class SignHandler {
 				s.setLine(0, ChatColor.DARK_PURPLE + "[Team]");
 				s.setLine(1, t.coloredName());
 				s.setLine(2, ChatColor.UNDERLINE.toString() + t.getPlayers().size()
-						+ (t.getPlayers().size() == 1 ? " Players" : " Player"));
-				if (t.getNexus() != null)
+						+ (t.getPlayers().size() == 1 ? " Player" : " Players"));
+				if (t.getNexus() != null && plugin.getPhase() > 0)
 					s.setLine(3, ChatColor.BOLD.toString() + "Nexus: "
 							+ t.getNexus().getHealth());
 				else
-					s.setLine(3, ChatColor.BOLD.toString() + "Nexus: 75");
+					s.setLine(3, " ");
 				s.update(true);
 			}
 		}

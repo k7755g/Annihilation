@@ -71,6 +71,8 @@ public final class Annihilation extends JavaPlugin {
 	public boolean updateAvailable = false;
 	public String newVersion;
 
+	public int build = 10;
+	
 	@Override
 	public void onEnable() {
 		try {
@@ -128,6 +130,9 @@ public final class Annihilation extends JavaPlugin {
 		sb.resetScoreboard(ChatColor.DARK_AQUA + "Voting" + ChatColor.WHITE
 				+ " | " + ChatColor.GOLD + "/vote <name>");
 
+		build = this.getConfig().getInt("build");
+		if (build == 0) build = 10;
+		
 		pm.registerEvents(resources, this);
 		pm.registerEvents(enderFurnaces, this);
 		pm.registerEvents(enderBrewingStands, this);
@@ -413,6 +418,11 @@ public final class Annihilation extends JavaPlugin {
 					
 					p.updateInventory();
 				}
+				
+				for (AnnihilationTeam t : AnnihilationTeam.values())
+					if (t != AnnihilationTeam.NONE) sign.updateSigns(t);
+				
+				checkStarting();
 			}
 		}, 2L);
 	}
