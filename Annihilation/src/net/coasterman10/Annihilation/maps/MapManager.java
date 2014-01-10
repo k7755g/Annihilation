@@ -18,9 +18,8 @@ public class MapManager {
 	private Location lobbySpawn;
 	private MapLoader mapLoader;
 	
-	public MapManager(Annihilation plugin, Configuration config) {
-		mapLoader = new MapLoader(plugin.getLogger(), plugin.getDataFolder());
-
+	public MapManager(Annihilation plugin, MapLoader loader, Configuration config) {
+		mapLoader = loader;
 		for (String s : config.getKeys(false)) {
 			if (!s.equalsIgnoreCase("lobby"))
 				maps.add(s);

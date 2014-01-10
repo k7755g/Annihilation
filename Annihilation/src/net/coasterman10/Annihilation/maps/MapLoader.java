@@ -40,6 +40,25 @@ public class MapLoader {
 			return false;
 		}
 	}
+	
+	public boolean saveMap(String name) {
+		File mapsFolder = new File(dataFolder, "maps");
+		if (!mapsFolder.exists())
+			mapsFolder.mkdir();
+		File source = new File(dataFolder.getParentFile().getParentFile(), name + File.separator + "region");
+		if (!source.exists())
+			return false;
+		
+		File destination = new File(mapsFolder, name);
+		try {
+			copyFolder(source, destination);
+			return true;
+		} catch (IOException e) {
+			log.severe("Could not save map " + name);
+			e.printStackTrace();
+			return false;
+		}
+	}
 
 	private void copyFolder(File src, File dest) throws IOException {
 		if (!src.exists()) {

@@ -14,6 +14,7 @@ import net.coasterman10.Annihilation.chat.ChatUtil;
 import net.coasterman10.Annihilation.commands.AnnihilationCommand;
 import net.coasterman10.Annihilation.commands.ClassCommand;
 import net.coasterman10.Annihilation.commands.DistanceCommand;
+import net.coasterman10.Annihilation.commands.MapCommand;
 import net.coasterman10.Annihilation.commands.StatsCommand;
 import net.coasterman10.Annihilation.commands.TeamCommand;
 import net.coasterman10.Annihilation.commands.TeamShortcutCommand;
@@ -28,6 +29,7 @@ import net.coasterman10.Annihilation.listeners.ResourceListener;
 import net.coasterman10.Annihilation.listeners.SoulboundListener;
 import net.coasterman10.Annihilation.listeners.WandListener;
 import net.coasterman10.Annihilation.listeners.WorldListener;
+import net.coasterman10.Annihilation.maps.MapLoader;
 import net.coasterman10.Annihilation.maps.MapManager;
 import net.coasterman10.Annihilation.maps.VotingManager;
 import net.coasterman10.Annihilation.stats.DatabaseHandler;
@@ -98,8 +100,10 @@ public final class Annihilation extends JavaPlugin {
 		configManager = new ConfigManager(this);
 		configManager.loadConfigFiles("config.yml", "maps.yml", "shops.yml",
 				"stats.yml");
+		
+		MapLoader mapLoader = new MapLoader(getLogger(), getDataFolder());
 
-		maps = new MapManager(this, configManager.getConfig("maps.yml"));
+		maps = new MapManager(this, mapLoader, configManager.getConfig("maps.yml"));
 
 		Configuration shops = configManager.getConfig("shops.yml");
 		new Shop(this, "Weapon", shops);
@@ -146,6 +150,7 @@ public final class Annihilation extends JavaPlugin {
 		getCommand("yellow").setExecutor(new TeamShortcutCommand());
 		getCommand("blue").setExecutor(new TeamShortcutCommand());
 		getCommand("distance").setExecutor(new DistanceCommand(this));
+		getCommand("map").setExecutor(new MapCommand(mapLoader));
 
 		BarUtil.init(this);
 
