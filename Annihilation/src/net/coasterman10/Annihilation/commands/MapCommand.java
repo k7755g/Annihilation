@@ -30,7 +30,7 @@ public class MapCommand implements CommandExecutor {
 				sender.sendMessage(ChatColor.GREEN + "Map " + args[1]
 						+ " loaded for editing.");
 				if (sender instanceof Player) {
-					sender.sendMessage("ChatColor.GREEN + Teleporting...");
+					sender.sendMessage(ChatColor.GREEN +" Teleporting...");
 					((Player) sender).teleport(Bukkit.getWorld(args[1])
 							.getSpawnLocation());
 				}
