@@ -5,6 +5,8 @@ import net.coasterman10.Annihilation.maps.VoidGenerator;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -31,8 +33,10 @@ public class MapCommand implements CommandExecutor {
 						+ " loaded for editing.");
 				if (sender instanceof Player) {
 					sender.sendMessage(ChatColor.GREEN +" Teleporting...");
-					((Player) sender).teleport(Bukkit.getWorld(args[1])
-							.getSpawnLocation());
+					World w = Bukkit.getWorld(args[1]);
+					Location loc = w.getSpawnLocation();
+					loc.setY(w.getHighestBlockYAt(loc));
+					((Player) sender).teleport(loc);
 				}
 			}
 			if (args[0].equalsIgnoreCase("save")) {

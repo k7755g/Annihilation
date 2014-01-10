@@ -27,5 +27,8 @@ commands:
   red:
     description: Join the Red team!
   distance:
-    description: Join the Red team!
+    description: Gets distance to enemy nexuses
     aliases: [d, dis]
+  map:
+    description: Map commands
+    aliases: m
