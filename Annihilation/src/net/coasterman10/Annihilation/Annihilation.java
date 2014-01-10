@@ -35,7 +35,6 @@ import net.coasterman10.Annihilation.stats.StatType;
 import net.coasterman10.Annihilation.stats.StatsManager;
 
 import org.apache.commons.lang.WordUtils;
-import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
