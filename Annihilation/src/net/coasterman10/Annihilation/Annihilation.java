@@ -48,7 +48,10 @@ import org.bukkit.configuration.Configuration;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffect;
@@ -383,6 +386,7 @@ public final class Annihilation extends JavaPlugin {
 			p.teleport(maps.getLobbySpawnPoint());
 			BarUtil.setMessageAndPercent(p, ChatColor.DARK_AQUA
 					+ "Welcome to Annihilation!", 0.01F);
+			p.setMaxHealth(20D);
 			p.setHealth(20D);
 			p.setFoodLevel(20);
 			p.setSaturation(20F);
@@ -417,6 +421,14 @@ public final class Annihilation extends JavaPlugin {
 					p.setLevel(0);
 					p.setExp(0);
 					p.setSaturation(20F);
+					
+					ItemStack selector = new ItemStack(Material.FEATHER);
+					ItemMeta itemMeta = selector.getItemMeta();
+					itemMeta.setDisplayName(ChatColor.AQUA
+							+ "Right click to select class");
+					selector.setItemMeta(itemMeta);
+
+					p.getInventory().setItem(0, selector);
 					
 					p.updateInventory();
 				}
@@ -491,6 +503,14 @@ public final class Annihilation extends JavaPlugin {
 					hasBlock = true;
 			}
 			return !hasBlock;
+		}
+		
+		public static void showClassSelector(Player player) {
+			int size = ((Kit.values().length + 8) / 9) * 9;
+			Inventory inv = Bukkit.createInventory(null, size, "Class Selector");
+			for (Kit kit : Kit.values())
+				inv.addItem(kit.getIcon());
+			player.openInventory(inv);
 		}
 	}
 

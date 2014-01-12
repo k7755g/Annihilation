@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map.Entry;
 
 import net.coasterman10.Annihilation.Annihilation;
+import net.coasterman10.Annihilation.AnnihilationTeam;
 import net.coasterman10.Annihilation.Kit;
 import net.coasterman10.Annihilation.PlayerMeta;
 
@@ -16,6 +17,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerFishEvent;
@@ -36,6 +38,35 @@ public class ClassAbilityListener implements Listener {
 				update();
 			}
 		}, 20L, 20L);
+	}
+
+	@EventHandler
+	public void onSpecialBlockBreak(BlockBreakEvent e) {
+		Block b = e.getBlock();
+		for (Entry<String, Location> entry : blockLocations.entrySet()) {
+			if (entry.getValue().equals(b.getLocation())) {
+				PlayerMeta meta = PlayerMeta.getMeta(entry.getKey());
+				AnnihilationTeam ownerTeam = meta.getTeam();
+				if (PlayerMeta.getMeta(e.getPlayer()).getTeam() == ownerTeam) {
+					e.setCancelled(true);
+					break;
+				}
+				Kit kit = meta.getKit();
+				if (kit == Kit.OPERATIVE
+						&& b.getType().equals(Material.SOUL_SAND)) {
+					Player owner = Bukkit.getPlayer(entry.getKey());
+					String ownerName = ownerTeam.color() + entry.getKey();
+					owner.sendMessage(ChatColor.RED
+							+ "Your return point was broken! You will not teleport back now.");
+					e.getPlayer().sendMessage(
+							ChatColor.DARK_AQUA + "You broke " + ownerName
+									+ "'s return point!");
+					cooldowns.remove(entry.getKey());
+					blockLocations.remove(entry.getKey());
+					break;
+				}
+			}
+		}
 	}
 
 	@SuppressWarnings("deprecation")

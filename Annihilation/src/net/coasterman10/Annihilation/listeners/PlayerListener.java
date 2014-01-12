@@ -31,6 +31,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -50,24 +51,36 @@ public class PlayerListener implements Listener {
 		Action a = e.getAction();
 		if (a == Action.RIGHT_CLICK_AIR || a == Action.RIGHT_CLICK_BLOCK) {
 			ItemStack handItem = player.getItemInHand();
-			if (handItem.getType() == Material.COMPASS) {
-				boolean setCompass = false;
-				boolean setToNext = false;
-				while (!setCompass) {
-					for (AnnihilationTeam team : AnnihilationTeam.teams()) {
-						if (setToNext) {
-							ItemMeta meta = handItem.getItemMeta();
-							meta.setDisplayName(team.color() + "Pointing to "
-									+ team.toString() + " Nexus");
-							handItem.setItemMeta(meta);
-							player.setCompassTarget(team.getNexus()
-									.getLocation());
-							setCompass = true;
-							break;
-						}
+			if (handItem != null) {
+				if (handItem.getType() == Material.FEATHER) {
+					if (handItem.getItemMeta().hasDisplayName()) {
 						if (handItem.getItemMeta().getDisplayName()
-								.contains(team.toString()))
-							setToNext = true;
+								.contains("Right click to select class")) {
+							Annihilation.Util.showClassSelector(e.getPlayer());
+							return;
+						}
+					}
+				}
+				if (handItem.getType() == Material.COMPASS) {
+					boolean setCompass = false;
+					boolean setToNext = false;
+					while (!setCompass) {
+						for (AnnihilationTeam team : AnnihilationTeam.teams()) {
+							if (setToNext) {
+								ItemMeta meta = handItem.getItemMeta();
+								meta.setDisplayName(team.color()
+										+ "Pointing to " + team.toString()
+										+ " Nexus");
+								handItem.setItemMeta(meta);
+								player.setCompassTarget(team.getNexus()
+										.getLocation());
+								setCompass = true;
+								break;
+							}
+							if (handItem.getItemMeta().getDisplayName()
+									.contains(team.toString()))
+								setToNext = true;
+						}
 					}
 				}
 			}
@@ -120,8 +133,16 @@ public class PlayerListener implements Listener {
 		if (meta.isAlive()) {
 			e.setRespawnLocation(meta.getTeam().getRandomSpawn());
 			meta.getKit().give(player, meta.getTeam());
-		} else
+		} else {
 			e.setRespawnLocation(plugin.getMapManager().getLobbySpawnPoint());
+			ItemStack selector = new ItemStack(Material.FEATHER);
+			ItemMeta itemMeta = selector.getItemMeta();
+			itemMeta.setDisplayName(ChatColor.AQUA
+					+ "Right click to select class");
+			selector.setItemMeta(itemMeta);
+
+			player.getInventory().setItem(0, selector);
+		}
 	}
 
 	@SuppressWarnings("deprecation")
@@ -161,6 +182,14 @@ public class PlayerListener implements Listener {
 			player.setLevel(0);
 			player.setExp(0);
 			player.setSaturation(20F);
+
+			ItemStack selector = new ItemStack(Material.FEATHER);
+			ItemMeta itemMeta = selector.getItemMeta();
+			itemMeta.setDisplayName(ChatColor.AQUA
+					+ "Right click to select class");
+			selector.setItemMeta(itemMeta);
+
+			player.getInventory().setItem(0, selector);
 
 			player.updateInventory();
 		}
@@ -399,6 +428,21 @@ public class PlayerListener implements Listener {
 		if (event.getEntity().getWorld().getName().equals("lobby")) {
 			event.setCancelled(true);
 			event.setFoodLevel(20);
+		}
+	}
+
+	@EventHandler
+	public void onInventoryClick(InventoryClickEvent e) {
+		Player player = (Player) e.getWhoClicked();
+		Inventory inv = e.getInventory();
+		if (inv.getTitle().equals("Class Selector")) {
+			player.closeInventory();
+			String name = e.getCurrentItem().getItemMeta().getDisplayName();
+			PlayerMeta meta = PlayerMeta.getMeta(player);
+			meta.setKit(Kit.getKit(ChatColor.stripColor(name)));
+			if (meta.isAlive())
+				player.setHealth(0.0);
+			player.sendMessage(ChatColor.DARK_AQUA + "Selected class " + ChatColor.stripColor(name));
 		}
 	}
 }
