@@ -27,12 +27,8 @@ public class MapCommand implements CommandExecutor {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		String cyan = ChatColor.DARK_AQUA.toString();
-		String white = ChatColor.WHITE.toString();
 		String gray = ChatColor.GRAY.toString();
 		String red = ChatColor.RED.toString();
-		String gold = ChatColor.GOLD.toString();
-		String yellow = ChatColor.YELLOW.toString();
-		String dgray = ChatColor.DARK_GRAY.toString();
 		final String green = ChatColor.GREEN.toString();
 		String prefix = cyan + "[Annihilation] " + gray;
 		
