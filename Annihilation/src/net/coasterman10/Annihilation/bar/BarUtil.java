@@ -120,7 +120,7 @@ public class BarUtil implements Listener {
 	private void sendDragon(FakeDragon dragon, Player player) {
 		Object metaPacket = dragon.getMetaPacket(dragon.getWatcher());
 		Object teleportPacket = dragon.getTeleportPacket(player.getLocation()
-				.add(0, -200, 0));
+				.add(0, -300, 0));
 
 		Util.sendPacket(player, metaPacket);
 		Util.sendPacket(player, teleportPacket);
@@ -135,7 +135,7 @@ public class BarUtil implements Listener {
 
 	private FakeDragon addDragon(Player player, String message) {
 		FakeDragon dragon = Util.newDragon(message,
-				player.getLocation().add(0, -200, 0));
+				player.getLocation().add(0, -300, 0));
 
 		Util.sendPacket(player, dragon.getSpawnPacket());
 
@@ -145,7 +145,7 @@ public class BarUtil implements Listener {
 	}
 
 	private FakeDragon addDragon(Player player, Location loc, String message) {
-		FakeDragon dragon = Util.newDragon(message, loc.add(0, -200, 0));
+		FakeDragon dragon = Util.newDragon(message, loc.add(0, -300, 0));
 
 		Util.sendPacket(player, dragon.getSpawnPacket());
 
