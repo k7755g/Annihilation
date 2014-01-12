@@ -23,6 +23,7 @@ public class MapCommand implements CommandExecutor {
 		this.loader = loader;
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 		String cyan = ChatColor.DARK_AQUA.toString();

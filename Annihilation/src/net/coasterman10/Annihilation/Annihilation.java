@@ -71,7 +71,7 @@ public final class Annihilation extends JavaPlugin {
 	public boolean updateAvailable = false;
 	public String newVersion;
 
-	public int build = 10;
+	public int build = 1;
 	
 	@Override
 	public void onEnable() {
@@ -130,8 +130,9 @@ public final class Annihilation extends JavaPlugin {
 		sb.resetScoreboard(ChatColor.DARK_AQUA + "Voting" + ChatColor.WHITE
 				+ " | " + ChatColor.GOLD + "/vote <name>");
 
-		build = this.getConfig().getInt("build");
-		if (build == 0) build = 10;
+		build = this.getConfig().getInt("build", 1);
+		
+		ClassCommand cc = new ClassCommand();
 		
 		pm.registerEvents(resources, this);
 		pm.registerEvents(enderFurnaces, this);
@@ -144,9 +145,10 @@ public final class Annihilation extends JavaPlugin {
 		pm.registerEvents(new WandListener(this), this);
 		pm.registerEvents(new CraftingListener(), this);
 		pm.registerEvents(new ClassAbilityListener(this), this);
+		pm.registerEvents(cc, this);
 
 		getCommand("annihilation").setExecutor(new AnnihilationCommand(this));
-		getCommand("class").setExecutor(new ClassCommand());
+		getCommand("class").setExecutor(cc);
 		getCommand("stats").setExecutor(new StatsCommand(stats));
 		getCommand("team").setExecutor(new TeamCommand(this));
 		getCommand("vote").setExecutor(new VoteCommand(voting));

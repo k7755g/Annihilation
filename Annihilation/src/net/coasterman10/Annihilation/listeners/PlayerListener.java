@@ -12,6 +12,7 @@ import net.coasterman10.Annihilation.stats.StatType;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
@@ -84,12 +85,14 @@ public class PlayerListener implements Listener {
 					if (team != null) {
 						if (pmeta.getTeam() == AnnihilationTeam.NONE) {
 							if (team.getNexus() != null) {
-								if (team.getNexus().getHealth() == 0 && plugin.getPhase() > 1) {
-									player.sendMessage(ChatColor.RED + "You cannot join a team without a Nexus!");
+								if (team.getNexus().getHealth() == 0
+										&& plugin.getPhase() > 1) {
+									player.sendMessage(ChatColor.RED
+											+ "You cannot join a team without a Nexus!");
 									return;
 								}
 							}
-							
+
 							pmeta.setTeam(team);
 							plugin.getScoreboardHandler().teams
 									.get(team.name()).addPlayer(player);
@@ -126,14 +129,20 @@ public class PlayerListener implements Listener {
 	public void onPlayerJoin(PlayerJoinEvent e) {
 		String prefix = ChatColor.AQUA + "[Annihilation] " + ChatColor.GRAY;
 		Player player = e.getPlayer();
-		
+
 		PlayerMeta meta = PlayerMeta.getMeta(player);
-		
-		if (player.hasPermission("annihilation.misc.updatenotify") && plugin.updateAvailable) {
-			player.sendMessage(prefix + ChatColor.GOLD + "An update is available! Please restart the server to apply this update.");
-			player.sendMessage(prefix + "Current Version: " + ChatColor.WHITE + plugin.getDescription().getVersion() + ChatColor.DARK_GRAY + " | " + ChatColor.GRAY + "Newest Version: " + ChatColor.WHITE + plugin.newVersion);
+
+		if (player.hasPermission("annihilation.misc.updatenotify")
+				&& plugin.updateAvailable) {
+			player.sendMessage(prefix
+					+ ChatColor.GOLD
+					+ "An update is available! Please restart the server to apply this update.");
+			player.sendMessage(prefix + "Current Version: " + ChatColor.WHITE
+					+ plugin.getDescription().getVersion()
+					+ ChatColor.DARK_GRAY + " | " + ChatColor.GRAY
+					+ "Newest Version: " + ChatColor.WHITE + plugin.newVersion);
 		}
-		
+
 		if (meta.isAlive())
 			player.teleport(meta.getTeam().getRandomSpawn());
 		else {
@@ -143,16 +152,16 @@ public class PlayerListener implements Listener {
 			inv.setChestplate(null);
 			inv.setLeggings(null);
 			inv.setBoots(null);
-			
+
 			player.getInventory().clear();
-			
-			for(PotionEffect effect : player.getActivePotionEffects())
+
+			for (PotionEffect effect : player.getActivePotionEffects())
 				player.removePotionEffect(effect.getType());
-			
+
 			player.setLevel(0);
 			player.setExp(0);
 			player.setSaturation(20F);
-			
+
 			player.updateInventory();
 		}
 
@@ -188,7 +197,7 @@ public class PlayerListener implements Listener {
 		}
 
 		plugin.getStatsManager().setValue(StatType.DEATHS, p,
-		plugin.getStatsManager().getStat(StatType.DEATHS, p) + 1);
+				plugin.getStatsManager().getStat(StatType.DEATHS, p) + 1);
 
 		if (p.getKiller() != null && !p.getKiller().equals(p)) {
 			Player killer = p.getKiller();
@@ -250,13 +259,12 @@ public class PlayerListener implements Listener {
 		if (plugin.getPhase() > 0) {
 			if (Annihilation.Util.isEmptyColumn(e.getBlock().getLocation()))
 				e.setCancelled(true);
-			
-			if (e.getBlock().getLocation().distance(AnnihilationTeam.RED.getNexus().getLocation()) < plugin.build
-			|| e.getBlock().getLocation().distance(AnnihilationTeam.GREEN.getNexus().getLocation()) < plugin.build
-			|| e.getBlock().getLocation().distance(AnnihilationTeam.BLUE.getNexus().getLocation()) < plugin.build
-			|| e.getBlock().getLocation().distance(AnnihilationTeam.YELLOW.getNexus().getLocation()) < plugin.build
-			&& !e.getPlayer().hasPermission("annihilation.buildbypass")) {
-				e.getPlayer().sendMessage(ChatColor.RED + "You cannot build this close to the nexus!");
+
+			if (tooClose(e.getBlock().getLocation())
+					&& !e.getPlayer().hasPermission("annihilation.buildbypass")) {
+				e.getPlayer().sendMessage(
+						ChatColor.RED
+								+ "You cannot build this close to the nexus!");
 				e.setCancelled(true);
 			}
 		} else {
@@ -265,7 +273,7 @@ public class PlayerListener implements Listener {
 		}
 	}
 
-	@EventHandler
+	@EventHandler(ignoreCancelled = true)
 	public void onBreak(BlockBreakEvent e) {
 		if (plugin.getPhase() > 0) {
 			for (AnnihilationTeam t : AnnihilationTeam.teams()) {
@@ -277,19 +285,37 @@ public class PlayerListener implements Listener {
 					return;
 				}
 			}
-			
-			if (e.getBlock().getLocation().distance(AnnihilationTeam.RED.getNexus().getLocation()) < plugin.build
-			|| e.getBlock().getLocation().distance(AnnihilationTeam.GREEN.getNexus().getLocation()) < plugin.build
-			|| e.getBlock().getLocation().distance(AnnihilationTeam.BLUE.getNexus().getLocation()) < plugin.build
-			|| e.getBlock().getLocation().distance(AnnihilationTeam.YELLOW.getNexus().getLocation()) < plugin.build
-			&& !e.getPlayer().hasPermission("annihilation.buildbypass")) {
-				e.getPlayer().sendMessage(ChatColor.RED + "You cannot build this close to the nexus!");
+
+			if (tooClose(e.getBlock().getLocation())
+					&& !e.getPlayer().hasPermission("annihilation.buildbypass")) {
+				e.getPlayer().sendMessage(
+						ChatColor.RED
+								+ "You cannot build this close to the nexus!");
 				e.setCancelled(true);
 			}
 		} else {
 			if (!e.getPlayer().hasPermission("annihilation.buildbypass"))
 				e.setCancelled(true);
 		}
+	}
+
+	private boolean tooClose(Location loc) {
+		double x = loc.getX();
+		double y = loc.getY();
+		double z = loc.getZ();
+
+		for (AnnihilationTeam team : AnnihilationTeam.teams()) {
+			Location nexusLoc = team.getNexus().getLocation();
+			double nX = nexusLoc.getX();
+			double nY = nexusLoc.getY();
+			double nZ = nexusLoc.getZ();
+			if (Math.abs(nX - x) <= plugin.build
+					&& Math.abs(nY - y) <= plugin.build
+					&& Math.abs(nZ - z) <= plugin.build)
+				return true;
+		}
+
+		return false;
 	}
 
 	@EventHandler
@@ -349,7 +375,7 @@ public class PlayerListener implements Listener {
 							victim.name() + "SB").setPrefix(
 							victim.color().toString());
 				}
-			}, 1L);
+			}, 2L);
 
 			if (victim.getNexus().getHealth() == 0) {
 				plugin.getScoreboardHandler().sb.resetScores(plugin
@@ -367,10 +393,10 @@ public class PlayerListener implements Listener {
 			plugin.getSignHandler().updateSigns(victim);
 		}
 	}
-	
+
 	@EventHandler
 	public void onFoodLevelChange(FoodLevelChangeEvent event) {
-		if (event.getEntity().getWorld().equals("lobby")) {
+		if (event.getEntity().getWorld().getName().equals("lobby")) {
 			event.setCancelled(true);
 			event.setFoodLevel(20);
 		}

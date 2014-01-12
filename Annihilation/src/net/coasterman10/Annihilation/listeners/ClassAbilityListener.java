@@ -19,7 +19,6 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.player.PlayerFishEvent;
-import org.bukkit.event.player.PlayerFishEvent.State;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
@@ -44,7 +43,7 @@ public class ClassAbilityListener implements Listener {
 	public void onSpecialBlockPlace(PlayerInteractEvent e) {
 		if (e.getAction() != Action.RIGHT_CLICK_BLOCK)
 			return;
-		
+
 		Player player = e.getPlayer();
 		Kit kit = PlayerMeta.getMeta(player).getKit();
 
@@ -85,15 +84,32 @@ public class ClassAbilityListener implements Listener {
 	public void onScoutGrapple(PlayerFishEvent e) {
 		Player player = e.getPlayer();
 		player.getItemInHand().setDurability((short) -10);
-		if (e.getState() != State.IN_GROUND)
-			return;
+		// if (e.getState() != State.FISHING && e.getState() != State.IN_GROUND)
+		// return;
 		if (PlayerMeta.getMeta(player).getKit() != Kit.SCOUT)
 			return;
 		if (!player.getItemInHand().getItemMeta().getDisplayName()
 				.contains("Grapple"))
 			return;
+
 		Location hookLoc = e.getHook().getLocation();
 		Location playerLoc = player.getLocation();
+
+		double hookX = (int) hookLoc.getX();
+		double hookY = (int) hookLoc.getY();
+		double hookZ = (int) hookLoc.getZ();
+
+		Material inType = hookLoc.getWorld().getBlockAt(hookLoc).getType();
+		if (inType == Material.AIR || inType == Material.WATER
+				|| inType == Material.LAVA) {
+			Material belowType = hookLoc.getWorld()
+					.getBlockAt((int) hookX, (int) (hookY - 0.1), (int) hookZ)
+					.getType();
+			if (belowType == Material.AIR || inType == Material.WATER
+					|| inType == Material.LAVA)
+				return;
+		}
+
 		playerLoc.setY(playerLoc.getY() + 0.5);
 		player.teleport(playerLoc);
 
@@ -130,17 +146,21 @@ public class ClassAbilityListener implements Listener {
 				continue;
 
 			String name = entry.getKey();
-			Player player = Bukkit.getPlayer(name);
+			final Player player = Bukkit.getPlayer(name);
 			if (!player.isOnline())
 				continue;
 			switch (PlayerMeta.getMeta(player).getKit()) {
 			case OPERATIVE:
 				if (cooldown == 0) {
-					Location returnPoint = blockLocations.get(name);
+					final Location returnPoint = blockLocations.get(name);
 					returnPoint.getBlock().setType(Material.AIR);
-					player.teleport(returnPoint);
-					player.sendMessage(ChatColor.DARK_AQUA
-							+ "You have been teleported back to your return point.");
+					Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
+						public void run() {
+							player.teleport(returnPoint);
+							player.sendMessage(ChatColor.DARK_AQUA
+									+ "You have been teleported back to your return point.");
+						}
+					}, 1L);
 					blockLocations.remove(name);
 				} else if (cooldown == 20 || cooldown == 10 || cooldown <= 5) {
 					player.sendMessage(ChatColor.DARK_AQUA

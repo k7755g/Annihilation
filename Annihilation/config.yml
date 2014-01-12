@@ -27,4 +27,4 @@ allowUpdater: true
 requiredToStart: 2
 
 # Build Distance from Nexus
-build: 10
+build: 1

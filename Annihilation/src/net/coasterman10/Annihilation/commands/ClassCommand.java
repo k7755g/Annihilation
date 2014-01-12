@@ -1,5 +1,7 @@
 package net.coasterman10.Annihilation.commands;
 
+import java.util.HashMap;
+
 import net.coasterman10.Annihilation.Kit;
 import net.coasterman10.Annihilation.PlayerMeta;
 
@@ -8,8 +10,13 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 
-public class ClassCommand implements CommandExecutor {
+public class ClassCommand implements CommandExecutor, Listener{
+	private HashMap<String, Kit> kitsToGive = new HashMap<String, Kit>();
+	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label,
 			String[] args) {
@@ -28,10 +35,14 @@ public class ClassCommand implements CommandExecutor {
 							+ "You are already a " + kit.getName());
 				} else if (kit != null) {
 					if (kit.isOwnedBy(player)) {
-						meta.setKit(kit);
 						player.sendMessage(ChatColor.DARK_AQUA + "You selected class " + kit.getName());
-						if (meta.isAlive())
+						if (meta.isAlive()) {
 							player.sendMessage(ChatColor.GREEN + "You will recieve the class when you respawn.");
+							kitsToGive.put(player.getName(), kit);
+						}
+						else {
+							meta.setKit(kit);
+						}
 					} else {
 						player.sendMessage(ChatColor.RED + "You do not own " + kit.getName());
 					}
@@ -43,6 +54,14 @@ public class ClassCommand implements CommandExecutor {
 			}
 		}
 		return false;
+	}
+	
+	@EventHandler
+	public void onPlayerDeath(PlayerDeathEvent e) {
+		if (kitsToGive.containsKey(e.getEntity().getName())) {
+			kitsToGive.remove(e.getEntity().getName());
+			PlayerMeta.getMeta(e.getEntity()).setKit(kitsToGive.get(e.getEntity().getName()));
+		}
 	}
 
 	private void listKits(Player player) {
