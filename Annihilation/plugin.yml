@@ -1,7 +1,7 @@
 name: Anni
 main: net.coasterman10.Annihilation.Annihilation
 authors: [coasterman10, stuntguy3000]
-version: 1.1
+version: 1.2
 commands:
   annihilation:
     description: Plugin commands for Annihilation
