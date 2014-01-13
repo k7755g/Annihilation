@@ -286,8 +286,9 @@ public enum Kit {
 			return;
 
 		for (ItemStack stack : p.getInventory().getArmorContents()) {
-			if (!stack.getType().name().toLowerCase().contains("leather")
-					&& !stack.getType().name().toLowerCase().contains("chain")) {
+			if (stack.getType().name().toLowerCase().contains("IRON")
+				|| stack.getType().name().toLowerCase().contains("DIAMOND")
+				|| stack.getType().name().toLowerCase().contains("GOLD")) {
 				p.removePotionEffect(PotionEffectType.SPEED);
 				p.sendMessage(ChatColor.DARK_AQUA
 						+ "That armor is too heavy for you to move quickly");

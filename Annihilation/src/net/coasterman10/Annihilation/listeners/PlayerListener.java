@@ -441,7 +441,7 @@ public class PlayerListener implements Listener {
 			PlayerMeta meta = PlayerMeta.getMeta(player);
 			meta.setKit(Kit.getKit(ChatColor.stripColor(name)));
 			if (meta.isAlive())
-				player.setHealth(0.0);
+				player.sendMessage(ChatColor.GREEN + "You will recieve this class when you respawn.");
 			player.sendMessage(ChatColor.DARK_AQUA + "Selected class " + ChatColor.stripColor(name));
 		}
 	}
