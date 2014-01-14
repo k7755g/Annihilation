@@ -32,6 +32,7 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerPortalEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -60,7 +61,8 @@ public class PlayerListener implements Listener {
 					if (handItem.getItemMeta().hasDisplayName()) {
 						if (handItem.getItemMeta().getDisplayName()
 								.contains("Right click to select class")) {
-							Annihilation.Util.showClassSelector(e.getPlayer());
+							Annihilation.Util.showClassSelector(e.getPlayer(),
+									"Select Class");
 							return;
 						}
 					}
@@ -265,6 +267,12 @@ public class PlayerListener implements Listener {
 	}
 
 	@EventHandler
+	public void onPlayerPortal(PlayerPortalEvent e) {
+		Player player = e.getPlayer();
+		Annihilation.Util.showClassSelector(player, "Select Class   ");
+	}
+
+	@EventHandler
 	public void onPlayerAttack(EntityDamageByEntityEvent e) {
 		Entity damager = e.getDamager();
 		if (damager instanceof Player) {
@@ -441,19 +449,23 @@ public class PlayerListener implements Listener {
 
 	@EventHandler
 	public void onInventoryClick(InventoryClickEvent e) {
-		Player player = (Player) e.getWhoClicked();
 		Inventory inv = e.getInventory();
-		if (inv.getTitle().equals("Class Selector")) {
+		Player player = (Player) e.getWhoClicked();
+		if (inv.getTitle().startsWith("Select Class")) {
+			if (e.getCurrentItem().getType() == Material.AIR)
+				return;
 			player.closeInventory();
 			String name = e.getCurrentItem().getItemMeta().getDisplayName();
 			PlayerMeta meta = PlayerMeta.getMeta(player);
-			if (meta.isAlive()) {
+			if (meta.isAlive() && !inv.getTitle().endsWith(" ")) {
 				player.sendMessage(ChatColor.GREEN
 						+ "You will recieve this class when you respawn.");
 				kitsToGive.put(player.getName(),
 						Kit.getKit(ChatColor.stripColor(name)));
 			} else {
 				meta.setKit(Kit.getKit(ChatColor.stripColor(name)));
+				if (meta.isAlive())
+					player.setHealth(0.0);
 			}
 			player.sendMessage(ChatColor.DARK_AQUA + "Selected class "
 					+ ChatColor.stripColor(name));
