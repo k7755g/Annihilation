@@ -8,4 +8,4 @@ Download now! http://dev.bukkit.org/bukkit-plugins/anni/
 
  **Developers**: coasterman10, stuntguy3000
 
-* **Current Version**: v1.3
+* **Current Version**: v1.31
