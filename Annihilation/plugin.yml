@@ -30,5 +30,5 @@ commands:
     description: Gets distance to enemy nexuses
     aliases: [d, dis]
   map:
-    description: Map commands
+    description: Admin Map commands
     aliases: m
