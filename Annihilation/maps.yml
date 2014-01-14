@@ -61,14 +61,14 @@ test:
   bosses:
     boss1:
       name: "&bCelariel"
-      spawn: ""
-      chest: ""
-      hearts: 50
+      spawn: "0,63,-21"
+      chest: "0,63,-23"
+      hearts: 100
     boss2:
       name: "&cFirwen"
-      spawn: ""
-      chest: ""
-      hearts: 50
+      spawn: "0,63,22"
+      chest: "0,63,24"
+      hearts: 100
     
 # The spawn location for the lobby world.
 # Mandatory.

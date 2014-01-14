@@ -1,6 +1,7 @@
 package net.coasterman10.Annihilation;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -19,6 +20,7 @@ import net.coasterman10.Annihilation.commands.StatsCommand;
 import net.coasterman10.Annihilation.commands.TeamCommand;
 import net.coasterman10.Annihilation.commands.TeamShortcutCommand;
 import net.coasterman10.Annihilation.commands.VoteCommand;
+import net.coasterman10.Annihilation.listeners.BossListener;
 import net.coasterman10.Annihilation.listeners.ClassAbilityListener;
 import net.coasterman10.Annihilation.listeners.CraftingListener;
 import net.coasterman10.Annihilation.listeners.EnderBrewingStandListener;
@@ -29,6 +31,7 @@ import net.coasterman10.Annihilation.listeners.ResourceListener;
 import net.coasterman10.Annihilation.listeners.SoulboundListener;
 import net.coasterman10.Annihilation.listeners.WandListener;
 import net.coasterman10.Annihilation.listeners.WorldListener;
+import net.coasterman10.Annihilation.manager.BossManager;
 import net.coasterman10.Annihilation.manager.ConfigManager;
 import net.coasterman10.Annihilation.manager.DatabaseManager;
 import net.coasterman10.Annihilation.manager.PhaseManager;
@@ -38,6 +41,7 @@ import net.coasterman10.Annihilation.manager.SignManager;
 import net.coasterman10.Annihilation.maps.MapLoader;
 import net.coasterman10.Annihilation.maps.MapManager;
 import net.coasterman10.Annihilation.maps.VotingManager;
+import net.coasterman10.Annihilation.object.Boss;
 import net.coasterman10.Annihilation.object.GameTeam;
 import net.coasterman10.Annihilation.object.Kit;
 import net.coasterman10.Annihilation.object.PlayerMeta;
@@ -79,11 +83,14 @@ public final class Annihilation extends JavaPlugin {
 	private SignManager sign;
 	private ScoreboardManager sb;
 	private DatabaseManager db;
+	private BossManager boss;
+	
 	public boolean useMysql = false;
 	public boolean updateAvailable = false;
 	public String newVersion;
 
 	public int build = 1;
+	public int respawn = 10;
 	
 	@Override
 	public void onEnable() {
@@ -134,7 +141,8 @@ public final class Annihilation extends JavaPlugin {
 				config.getInt("phase-period"));
 		voting = new VotingManager(this);
 		sb = new ScoreboardManager();
-
+		boss = new BossManager(this);
+		
 		PluginManager pm = getServer().getPluginManager();
 
 		sign.loadSigns();
@@ -155,7 +163,8 @@ public final class Annihilation extends JavaPlugin {
 		pm.registerEvents(new WandListener(this), this);
 		pm.registerEvents(new CraftingListener(), this);
 		pm.registerEvents(new ClassAbilityListener(this), this);
-
+		pm.registerEvents(new BossListener(this), this);
+		
 		getCommand("annihilation").setExecutor(new AnnihilationCommand(this));
 		getCommand("class").setExecutor(new ClassCommand());
 		getCommand("stats").setExecutor(new StatsCommand(stats));
@@ -239,6 +248,17 @@ public final class Annihilation extends JavaPlugin {
 				loc.getBlock().setType(Material.ENDER_CHEST);
 			}
 		}
+		
+		if (section.contains("bosses")) {
+			HashMap<String, Boss> bosses = new HashMap<String, Boss>();
+			ConfigurationSection sec = section.getConfigurationSection("bosses");
+			for (String boss : sec.getKeys(false))
+				bosses.put(boss, 
+				new Boss(boss, sec.getInt(boss + ".hearts") * 2, sec.getString(boss + ".name"), 
+				Util.parseLocation(w, sec.getString(boss + ".spawn")), 
+				Util.parseLocation(w, sec.getString(boss + ".chest"))));
+			boss.loadBosses(bosses);
+		}
 
 		if (section.contains("diamonds")) {
 			Set<Location> diamonds = new HashSet<Location>();
@@ -302,8 +322,13 @@ public final class Annihilation extends JavaPlugin {
 
 	public void advancePhase() {
 		ChatUtil.phaseMessage(timer.getPhase());
+		
+		if (timer.getPhase() == 2)
+			boss.spawnBosses();
+		
 		if (timer.getPhase() == 3)
 			resources.spawnDiamonds();
+		
 		Bukkit.getPluginManager().callEvent(
 				new PhaseChangeEvent(timer.getPhase()));
 
@@ -525,5 +550,9 @@ public final class Annihilation extends JavaPlugin {
 			if (Bukkit.getOnlinePlayers().length >= getConfig().getInt("requiredToStart"))
 				timer.start();
 		}
+	}
+
+	public BossManager getBossManager() {
+		return boss;
 	}
 }
