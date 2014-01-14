@@ -1,4 +1,4 @@
-package net.coasterman10.Annihilation.stats;
+package net.coasterman10.Annihilation.manager;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,7 +13,7 @@ import net.coasterman10.Annihilation.Annihilation;
 
 import org.bukkit.Bukkit;
 
-public class DatabaseHandler {
+public class DatabaseManager {
 	private static final Logger logger = Bukkit.getLogger();
     protected boolean connected = false; 
     
@@ -22,13 +22,13 @@ public class DatabaseHandler {
     private Annihilation plugin;
     public Connection c = null; 
   
-    public DatabaseHandler(String hostname, int port, String database, String username, String password, Annihilation plugin) { 
+    public DatabaseManager(String hostname, int port, String database, String username, String password, Annihilation plugin) { 
         driver="com.mysql.jdbc.Driver";
         connectionString="jdbc:mysql://" + hostname + ":" + port + "/" + database+ "?user=" + username + "&password=" + password;
         this.plugin = plugin;
     } 
     
-    public DatabaseHandler(Annihilation plugin) { 
+    public DatabaseManager(Annihilation plugin) { 
     	this.plugin = plugin;
     }
     

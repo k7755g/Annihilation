@@ -30,6 +30,7 @@ import net.coasterman10.Annihilation.listeners.SoulboundListener;
 import net.coasterman10.Annihilation.listeners.WandListener;
 import net.coasterman10.Annihilation.listeners.WorldListener;
 import net.coasterman10.Annihilation.manager.ConfigManager;
+import net.coasterman10.Annihilation.manager.DatabaseManager;
 import net.coasterman10.Annihilation.manager.PhaseManager;
 import net.coasterman10.Annihilation.manager.RestartHandler;
 import net.coasterman10.Annihilation.manager.ScoreboardManager;
@@ -41,7 +42,6 @@ import net.coasterman10.Annihilation.object.GameTeam;
 import net.coasterman10.Annihilation.object.Kit;
 import net.coasterman10.Annihilation.object.PlayerMeta;
 import net.coasterman10.Annihilation.object.Shop;
-import net.coasterman10.Annihilation.stats.DatabaseHandler;
 import net.coasterman10.Annihilation.stats.StatType;
 import net.coasterman10.Annihilation.stats.StatsManager;
 
@@ -78,7 +78,7 @@ public final class Annihilation extends JavaPlugin {
 	private StatsManager stats;
 	private SignManager sign;
 	private ScoreboardManager sb;
-	private DatabaseHandler db;
+	private DatabaseManager db;
 	public boolean useMysql = false;
 	public boolean updateAvailable = false;
 	public String newVersion;
@@ -179,14 +179,14 @@ public final class Annihilation extends JavaPlugin {
 			String name = config.getString("MySQL.name");
 			String user = config.getString("MySQL.user");
 			String pass = config.getString("MySQL.pass");
-			db = new DatabaseHandler(host, port, name, user, pass, this);
+			db = new DatabaseManager(host, port, name, user, pass, this);
 
 			db.query("CREATE TABLE IF NOT EXISTS `annihilation` ( `username` varchar(16) NOT NULL, "
 					+ "`kills` int(16) NOT NULL, `deaths` int(16) NOT NULL, `wins` int(16) NOT NULL, "
 					+ "`losses` int(16) NOT NULL, `nexus_damage` int(16) NOT NULL, "
 					+ "UNIQUE KEY `username` (`username`) ) ENGINE=InnoDB DEFAULT CHARSET=latin1;");
 		} else
-			db = new DatabaseHandler(this);
+			db = new DatabaseManager(this);
 
 		reset();
 
@@ -343,7 +343,7 @@ public final class Annihilation extends JavaPlugin {
 		return stats;
 	}
 
-	public DatabaseHandler getDatabaseHandler() {
+	public DatabaseManager getDatabaseHandler() {
 		return db;
 	}
 

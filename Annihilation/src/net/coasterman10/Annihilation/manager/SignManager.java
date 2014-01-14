@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import net.coasterman10.Annihilation.Annihilation;
-import net.coasterman10.Annihilation.Annihilation.Util;
 import net.coasterman10.Annihilation.object.GameTeam;
 
 import org.bukkit.Bukkit;
