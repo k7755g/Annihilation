@@ -150,7 +150,8 @@ public final class Annihilation extends JavaPlugin {
 		sb.resetScoreboard(ChatColor.DARK_AQUA + "Voting" + ChatColor.WHITE
 				+ " | " + ChatColor.GOLD + "/vote <name>");
 
-		build = this.getConfig().getInt("build", 1);
+		build = this.getConfig().getInt("build", 5);
+		respawn = this.getConfig().getInt("bossRespawnDelay", 10);
 		
 		pm.registerEvents(resources, this);
 		pm.registerEvents(enderFurnaces, this);

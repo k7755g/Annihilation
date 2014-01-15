@@ -83,6 +83,6 @@ public class BossListener implements Listener {
 				ChatUtil.bossRespawn(b);
 				plugin.getBossManager().spawn(n);
 			}
-		}, 20 * plugin.respawn);
+		}, 20 * plugin.respawn * 60);
 	}
 }
