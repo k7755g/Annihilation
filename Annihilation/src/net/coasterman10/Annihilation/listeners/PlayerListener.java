@@ -1,8 +1,10 @@
 package net.coasterman10.Annihilation.listeners;
 
 import java.util.HashMap;
+import java.util.Random;
 
 import net.coasterman10.Annihilation.Annihilation;
+import net.coasterman10.Annihilation.Annihilation.Util;
 import net.coasterman10.Annihilation.api.NexusDamageEvent;
 import net.coasterman10.Annihilation.api.NexusDestroyEvent;
 import net.coasterman10.Annihilation.bar.BarUtil;
@@ -16,6 +18,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
@@ -421,6 +424,9 @@ public class PlayerListener implements Listener {
 							victim.color().toString());
 				}
 			}, 2L);
+			
+			Random r = new Random();
+			victim.getNexus().getLocation().getWorld().playSound(victim.getNexus().getLocation(), Sound.ANVIL_LAND, 0.7F, r.nextFloat());
 
 			if (victim.getNexus().getHealth() == 0) {
 				plugin.getScoreboardHandler().sb.resetScores(plugin
@@ -433,6 +439,12 @@ public class PlayerListener implements Listener {
 				for (Player p : victim.getPlayers()) {
 					plugin.getStatsManager().incrementStat(StatType.LOSSES, p);
 				}
+				for (Player player : Bukkit.getOnlinePlayers()) {
+					player.getWorld().playSound(player.getLocation(), Sound.EXPLODE, 1F, 2F);
+	            }
+				Util.spawnFirework(victim.getNexus().getLocation());
+				Util.spawnFirework(victim.getNexus().getLocation());
+				Util.spawnFirework(victim.getNexus().getLocation());
 			}
 
 			plugin.getSignHandler().updateSigns(victim);

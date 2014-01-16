@@ -107,8 +107,13 @@ public class ChatUtil {
 
 		String message = ChatColor.GRAY + original;
 		message = message.replace(victim.getName(), victimName);
-
-		return message;
+		
+		if (message.contains(" §8»")) {
+			String[] arr = message.split(" §8»");
+			message = arr[0];
+		}
+		
+		return message.replace("was slain by", "was killed by");
 	}
 
 	public static String translateRoman(int number) {

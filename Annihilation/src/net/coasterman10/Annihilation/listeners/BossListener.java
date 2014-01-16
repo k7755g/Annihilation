@@ -1,6 +1,7 @@
 package net.coasterman10.Annihilation.listeners;
 
 import net.coasterman10.Annihilation.Annihilation;
+import net.coasterman10.Annihilation.Annihilation.Util;
 import net.coasterman10.Annihilation.chat.ChatUtil;
 import net.coasterman10.Annihilation.object.Boss;
 import net.coasterman10.Annihilation.object.PlayerMeta;
@@ -69,6 +70,9 @@ public class BossListener implements Listener {
 				Player killer = g.getKiller();
 				ChatUtil.bossDeath(b, killer, PlayerMeta.getMeta(killer).getTeam());
 				respawn(b);
+				Util.spawnFirework(event.getEntity().getLocation());
+				Util.spawnFirework(event.getEntity().getLocation());
+				Util.spawnFirework(event.getEntity().getLocation());
 			} else {
 				g.teleport(b.getSpawn());
 			}
